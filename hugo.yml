@@ -23,10 +23,10 @@ params:
     imageWidth: 120
     imageHeight: 120
     buttons:
-      - name: Archive
-        url: /archives/
       - name: posts
-        url: /posts/
+        url: posts
+      - name: archives
+        url: archives
   socialIcons:
     - name: Twitter
       url: 'https://www.x.com/M4LW0R3'
