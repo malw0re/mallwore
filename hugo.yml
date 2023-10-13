@@ -22,11 +22,7 @@ params:
       https://gravatar.com/userimage/240671049/2d48e03b178cf3a522298095ef884cbe.jpeg?size=256
     imageWidth: 120
     imageHeight: 120
-    buttons:
-      - name: posts
-        url: posts
-      - name: archives
-        url: archives
+ 
   socialIcons:
     - name: Twitter
       url: 'https://www.x.com/M4LW0R3'
