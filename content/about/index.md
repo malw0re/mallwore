@@ -4,7 +4,6 @@ showToc: false
 ---
 # **My Resume**
 
-
 ## Work Experience
 
 
