@@ -3,3 +3,75 @@ languageCode: en-us
 title: OUHBOY
 theme: PaperMod
 
+enableRobotsTXT: true
+params:
+  cover:
+    linkFullImages: true
+  defaultTheme: auto
+  ShowCodeCopyButtons: true
+  ShowReadingTime: true
+  author: "Malw0re"
+  searchHidden: true
+  showtoc: true
+  ShowPostNavLinks: true
+  profileMode:
+    enabled: true
+    title: Malw0re
+    subtitle: 'A blog about technical stuff ..... '
+    imageUrl: >-
+      https://gravatar.com/userimage/240671049/2d48e03b178cf3a522298095ef884cbe.jpeg?size=256
+    imageWidth: 120
+    imageHeight: 120
+    buttons:
+      - name: Archive
+        url: /archives/
+      - name: posts
+        url: /posts/
+  socialIcons:
+    - name: Twitter
+      url: 'https://www.x.com/M4LW0R3'
+    - name: LinkedIn
+      url: 'https://www.linkedin.com/in/brian-karanja-21331b164/'
+    - name: Github
+      url: 'https://github.com/malw0re/'
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys:
+      - title
+      - permalink
+      - summary
+      - content
+menu:
+  main:
+    - identifier: about
+      name: about
+      url: /about/
+      weight: 20
+    - identifier: tags
+      name: tags
+      url: /tags/
+      weight: 30
+    - identifier: Posts
+      name: posts
+      url: /posts/
+      weight: 10
+    - identifier: archives
+      name: archives
+      url: /archives/
+      weight: 40
+    - identifier: search
+      name: "\U0001F50D"
+      url: /search/
+      weight: 50
+
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON # is necessary
