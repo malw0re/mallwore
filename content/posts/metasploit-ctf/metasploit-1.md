@@ -4,7 +4,6 @@ date: 2023-09-15T11:30:03+00:00
 # weight: 1
 # aliases: ["/first"]
 tags: ["Metasploit-ctf"]
-author: "Malw0re"
 # author: ["Me", "You"] # multiple authors
 showToc: true
 TocOpen: false
