@@ -11,7 +11,7 @@ ShowToc: true
 
 ![](https://i.imgur.com/GMsEYt3.png)
 
-Hi 👋, in this article i'll be sharing some challenges from the hacktheboo ctf challenges that was up i covered 3 challenges didn't cover rest that much. So for the first bat challenge it was under the practice section and the last two are forensics which i decided to work on they were interesting. 
+Hi 👋, in this article i'll be sharing some challenges from the hacktheboo ctf challenges that was up i covered 3 challenges didn't touch on the rest that much. So for the first bat challenge it was under the practice section and the last two are forensics which i decided to work on they were interesting. 
 
 Hope you have a nice read 😅
 
