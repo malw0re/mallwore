@@ -7,6 +7,7 @@ description: "Stealth Tryhackme Room"
 ---
 
 ![](https://i.imgur.com/gd7lkVU.png)
+[stealth tryhackmeroom](https://tryhackme.com/room/stealth)
 
 ## nmap scans
 

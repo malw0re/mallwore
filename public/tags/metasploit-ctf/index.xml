@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Metasploit-ctf on OUHBOY</title>
+    <link>https://malw0re.github.io/tags/metasploit-ctf/</link>
+    <description>Recent content in Metasploit-ctf on OUHBOY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 05 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://malw0re.github.io/tags/metasploit-ctf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MSF CTF II</title>
+      <link>https://malw0re.github.io/posts/metasploit-ctf/metasploit-2/</link>
+      <pubDate>Thu, 05 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/metasploit-ctf/metasploit-2/</guid>
+      <description>Metasploit ctf series two</description>
+    </item>
+    
+    <item>
+      <title>MSF CTF</title>
+      <link>https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/</link>
+      <pubDate>Fri, 15 Sep 2023 11:30:03 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/</guid>
+      <description>Metasploit ctf series</description>
+    </item>
+    
+  </channel>
+</rss>

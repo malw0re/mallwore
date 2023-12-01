@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Hacktheboo 2023 CTF | OUHBOY</title>
+<meta name="keywords" content="ctf">
+<meta name="description" content="Challenges Writeup">
+<meta name="author" content="Malw0re">
+<link rel="canonical" href="https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://malw0re.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://malw0re.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://malw0re.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://malw0re.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://malw0re.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Hacktheboo 2023 CTF" />
+<meta property="og:description" content="Challenges Writeup" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-10-23T17:21:14+03:00" />
+<meta property="article:modified_time" content="2023-10-23T17:21:14+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Hacktheboo 2023 CTF"/>
+<meta name="twitter:description" content="Challenges Writeup"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://malw0re.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Hacktheboo 2023 CTF",
+      "item": "https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hacktheboo 2023 CTF",
+  "name": "Hacktheboo 2023 CTF",
+  "description": "Challenges Writeup",
+  "keywords": [
+    "ctf"
+  ],
+  "articleBody": " Hi 👋, in this article i’ll be sharing some challenges from the hacktheboo ctf challenges that was up i covered 3 challenges didn’t touch on the rest that much. So for the first bat challenge it was under the practice section and the last two are forensics which i decided to work on they were interesting.\nHope you have a nice read 😅\nBat Problems Explanation We are given the following file:\npayload.bat: Malicious bat file. As we can see from the following image, the bat script contains many random variables that are assigned random values. In a batch script (a .bat or .cmd file), the set command defines and manipulates environment variables which store information that can be used by the script or other programs running in the same environment (the Command Prompt session).\nSolution First, the bat file can be analyzed using Any.Run which is a malware analyzer tool. We will get the following result if we upload the sample on the aforementioned site.\nBy analyzing the behavior graph, we notice three actions made:\nThe attacker can be seen using cmd to copy PowerShell to a different path with a random name (Earttxmxaqr.png). The attacker then uses cmd again to rename the downloaded bat file and also change it’s extension to .png.bat to avoid detection. The attacker executes the base64 encoded string using the renamed PowerShell executable (-enc argument in Powershell is used to pass a base64 encoded command). By decoding the string, the flag can be retrieved.\nTrick or Treat Explanation We are given the following file:\ncapture.pcap: Packet capture file trick_or_treat.lnk: The malicious file Since the malicious file is provided by HTB, we can first gain additional information on it through VirusTotal, a famous OSINT website. After scanning, the file shows that it is indeed malicious and it connects to a malicious domain called windowsliveupdater.com. We also can notice that the file is connected to a few IP addresses, mainly 209.197.3.8 which is the malicious one.\nAnalyzing further, we can understand what kind of processes are executed by the malicious file and how it attacks a system.\nAs shown in the picture below, the malicious file seems to download malicious data from http://windowsliveupdater.com using a random User-Agent for HTTP requests to essentially mask its identity on the network. It then sets the downloaded data into a variable ($vurnwos) and processes the characters in pairs and converts them from hexadecimal representation to their actual characters. It then performs a bitwise XOR operation with 0x1d on each character and the output is appended to the $vurnwos string. Finally, it executes the variable using Invoke-Command. It also attempts to execute an empty variable ($asvods).\nAfter knowing what the malicious file does, the packet capture file can be analyzed using Wireshark to find the downloaded content. Since we know that the malicious file requested data from a website, we can filter HTTP packets only.\nGoing through the HTTP packets, we find a packet that shows the victim sending a GET request to http://windowsliveupdater.com. Analyzing the User-Agent, we can see that it is one of the randomized user agents set in the malicious file.\nNow we know that that the IP address 77.74.198.52 is responsible for the malicious file execution, we can check its HTTP response. Notice that the HTTP response packet has a cleartext data that is truncated because it is too long for Wireshark. The data is our key to getting the flag and it must be extracted using the decoding method specified in the malicious file.\nSolution Since we know that the downloable content is encoded in hex and also XOR’ed using this key 0x1d, we can use CyberChef to extract the content.\nValHalloween Explanation We are given the following file:\nLogs: Directory containing various Windows XML EventLog (.evtx) files In this challenge, we are given a series of questions that must be answered to obtain the flag. These answers can all be located in certain event log files provided by HTB.\nSolution What are the IP address and port of the server from which the malicious actors downloaded the ransomware? (for example: 98.76.54.32:443) Answer: 103.162.14.116:8888 To complete this question, we can analyze the Security log file and filter the logs with event ID 4688 which is normally logged in Event Viewer when a new process is created. After filtering the results, we find a Powershell script that was executed to download the ransomware (‘mscalc.exe’) from a malicious server with its IP address and port. Additionally, we now know the estimated time of the ransomware attack is around 11:03:24 AM on 20/9/2023.\nAccording to the sysmon logs, what is the MD5 hash of the ransomware? (for example: 6ab0e507bcc2fad463959aa8be2d782f) Answer: B94F3FF666D9781CB69088658CD53772 To complete this question, we can analyze the sysmon log file and filter the logs with event ID 1 which is normally logged in Event Viewer when a new process is created. After filtering the results and since we know the Powershell script downloads the ransomware, we can attempt to find its child processes to locate the creation process of the ransomware. After analyzing the logs, we can find the ransomware with its MD5 hash.\nBased on the hash found, determine the family label of the ransomware in the wild from online reports such as Virus Total, Hybrid Analysis, etc. (for example: wannacry) Answer: lokilocker To complete this question, just put the ransomware’s MD5 hash to any OSINT tool and check its family labels.\nWhat is the name of the task scheduled by the ransomware? (for example: WindowsUpdater) Answer: Loki To complete this question, we can analyze the sysmon log file and filter the logs with keyword ‘schtasks’ which is the name for task scheduling process. After filtering the results, we find a schtasks program with the parent process being the ransomware.\nWhat are the parent process name and ID of the ransomware process? (for example: svchost.exe_4953) Answer: powershell.exe_3856 To complete this question, we can analyze the sysmon log file and check the ransomware process again. Viewing the XML format of the ransomware process, we can easily find the parent process name and ID of the ransomware process.\nFollowing the PPID, provide the file path of the initial stage in the infection chain. (for example: D:\\Data\\KCorp\\FirstStage.pdf) Answer: C:\\Users\\HoaGay\\Documents\\Subjects\\Unexpe.docx To complete this question, we can analyze the Security log file again and check the Powershell script process again. As the question suggests, we can use the PPID to retrace the steps to the initial stage in the infection chain. As shown in the pictures below, we then stumble upon a malicious .docx file\nWhen was the first file in the infection chain opened (in UTC)? (for example: 1975-04-30_12:34:56) Answer: 2023-09-20_03:03:20 To complete this question, we can just view the XML format of the .docx file and find the TimeCreated SystemTime row. ENSURE THE TIME FORMAT IS IN UTC!\n",
+  "wordCount" : "1139",
+  "inLanguage": "en",
+  "datePublished": "2023-10-23T17:21:14+03:00",
+  "dateModified": "2023-10-23T17:21:14+03:00",
+  "author":{
+    "@type": "Person",
+    "name": "Malw0re"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OUHBOY",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://malw0re.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://malw0re.github.io/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://malw0re.github.io/posts/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/archives/" title="archives">
+                    <span>archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/search/" title="🔍 (Alt &#43; /)" accesskey=/>
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Hacktheboo 2023 CTF
+    </h1>
+    <div class="post-description">
+      Challenges Writeup
+    </div>
+    <div class="post-meta">&lt;span title=&#39;2023-10-23 17:21:14 &#43;0300 EAT&#39;&gt;October 23, 2023&lt;/span&gt;&amp;nbsp;·&amp;nbsp;6 min&amp;nbsp;·&amp;nbsp;Malw0re
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#bat-problems" aria-label="Bat Problems">Bat Problems</a><ul>
+                        
+                <li>
+                    <a href="#explanation" aria-label="Explanation">Explanation</a></li>
+                <li>
+                    <a href="#solution" aria-label="Solution">Solution</a></li></ul>
+                </li>
+                <li>
+                    <a href="#trick-or-treat" aria-label="Trick or Treat">Trick or Treat</a><ul>
+                        
+                <li>
+                    <a href="#explanation-1" aria-label="Explanation">Explanation</a></li>
+                <li>
+                    <a href="#solution-1" aria-label="Solution">Solution</a></li></ul>
+                </li>
+                <li>
+                    <a href="#valhalloween" aria-label="ValHalloween">ValHalloween</a><ul>
+                        
+                <li>
+                    <a href="#explanation-2" aria-label="Explanation">Explanation</a></li>
+                <li>
+                    <a href="#solution-2" aria-label="Solution">Solution</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="https://i.imgur.com/GMsEYt3.png" alt=""  />
+</p>
+<p>Hi 👋, in this article i&rsquo;ll be sharing some challenges from the hacktheboo ctf challenges that was up i covered 3 challenges didn&rsquo;t touch on the rest that much. So for the first bat challenge it was under the practice section and the last two are forensics which i decided to work on they were interesting.</p>
+<p>Hope you have a nice read 😅</p>
+<h2 id="bat-problems">Bat Problems<a hidden class="anchor" aria-hidden="true" href="#bat-problems">#</a></h2>
+<h3 id="explanation">Explanation<a hidden class="anchor" aria-hidden="true" href="#explanation">#</a></h3>
+<p>We are given the following file:</p>
+<ul>
+<li><code>payload.bat</code>: Malicious bat file.</li>
+</ul>
+<p>As we can see from the following image, the bat script contains many random variables that are assigned random values. In a batch script (a .bat or .cmd file), the set command defines and manipulates environment variables which store information that can be used by the script or other programs running in the same environment (the Command Prompt session).</p>
+<p><img loading="lazy" src="https://i.imgur.com/6Ila1bK.png" alt=""  />
+</p>
+<h3 id="solution">Solution<a hidden class="anchor" aria-hidden="true" href="#solution">#</a></h3>
+<p>First, the bat file can be analyzed using <code>Any.Run</code> which is a malware analyzer tool.
+We will get the following result if we upload the sample on the aforementioned site.</p>
+<p><img loading="lazy" src="https://i.imgur.com/qHgSgit.png" alt=""  />
+</p>
+<p>By analyzing the behavior graph, we notice three actions made:</p>
+<ol>
+<li>The attacker can be seen using <code>cmd</code> to copy PowerShell to a different path with a random name (Earttxmxaqr.png).</li>
+<li>The attacker then uses cmd again to rename the downloaded bat file and also change it&rsquo;s extension to <code>.png.bat</code> to avoid detection.</li>
+<li>The attacker executes the base64 encoded string using the renamed PowerShell executable (<code>-enc</code> argument in Powershell is used to pass a base64 encoded command).</li>
+</ol>
+<p><img loading="lazy" src="https://i.imgur.com/TnYjjwM.png" alt=""  />
+</p>
+<p>By decoding the string, the flag can be retrieved.</p>
+<p><img loading="lazy" src="https://i.imgur.com/yXGbDwO.png" alt=""  />
+</p>
+<h2 id="trick-or-treat">Trick or Treat<a hidden class="anchor" aria-hidden="true" href="#trick-or-treat">#</a></h2>
+<h3 id="explanation-1">Explanation<a hidden class="anchor" aria-hidden="true" href="#explanation-1">#</a></h3>
+<p>We are given the following file:</p>
+<ul>
+<li><code>capture.pcap</code>: Packet capture file</li>
+<li><code>trick_or_treat.lnk</code>: The malicious file</li>
+</ul>
+<p>Since the malicious file is provided by HTB, we can first gain additional information on it through <code>VirusTotal</code>, a famous OSINT website. After scanning, the file shows that it is indeed malicious and it connects to a malicious domain called <code>windowsliveupdater.com</code>. We also can notice that the file is connected to a few IP addresses, mainly <code>209.197.3.8</code> which is the malicious one.</p>
+<p><img loading="lazy" src="https://i.imgur.com/2D3e9x9.png" alt=""  />
+</p>
+<p>Analyzing further, we can understand what kind of processes are executed by the malicious file and how it attacks a system.</p>
+<p>As shown in the picture below, the malicious file seems to download malicious data from <code>http://windowsliveupdater.com</code> using a random User-Agent for HTTP requests to essentially mask its identity on the network. It then sets the downloaded data into a variable (<code>$vurnwos</code>) and processes the characters in pairs and converts them from hexadecimal representation to their actual characters. It then performs a bitwise XOR operation with <code>0x1d</code> on each character and the output is appended to the <code>$vurnwos</code> string. Finally, it executes the variable using <code>Invoke-Command</code>. It also attempts to execute an empty variable (<code>$asvods</code>).</p>
+<p><img loading="lazy" src="https://i.imgur.com/CCvPfrn.png" alt=""  />
+</p>
+<p>After knowing what the malicious file does, the packet capture file can be analyzed using Wireshark to find the downloaded content. Since we know that the malicious file requested data from a website, we can filter <code>HTTP</code> packets only.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/ctf4.png" alt=""  />
+</p>
+<p>Going through the HTTP packets, we find a packet that shows the victim sending a GET request to <code>http://windowsliveupdater.com</code>. Analyzing the <code>User-Agent</code>, we can see that it is one of the randomized user agents set in the malicious file.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/ctf5.png" alt=""  />
+</p>
+<p>Now we know that that the IP address <code>77.74.198.52</code> is responsible for the malicious file execution, we can check its HTTP response. Notice that the HTTP response packet has a cleartext data that is truncated because it is too long for Wireshark. The data is our key to getting the flag and it must be extracted using the decoding method specified in the malicious file.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/ctf6.png" alt=""  />
+</p>
+<p><img loading="lazy" src="https://i.imgur.com/DcWJVAU.png" alt=""  />
+</p>
+<h3 id="solution-1">Solution<a hidden class="anchor" aria-hidden="true" href="#solution-1">#</a></h3>
+<p>Since we know that the downloable content is encoded in hex and also XOR&rsquo;ed using this key <code>0x1d</code>, we can use <code>CyberChef</code> to extract the content.</p>
+<p><img loading="lazy" src="https://i.imgur.com/kk8AUa1.png" alt=""  />
+</p>
+<h2 id="valhalloween">ValHalloween<a hidden class="anchor" aria-hidden="true" href="#valhalloween">#</a></h2>
+<h3 id="explanation-2">Explanation<a hidden class="anchor" aria-hidden="true" href="#explanation-2">#</a></h3>
+<p>We are given the following file:</p>
+<ul>
+<li><code>Logs</code>: Directory containing various Windows XML EventLog (.evtx) files</li>
+</ul>
+<p>In this challenge, we are given a series of questions that must be answered to obtain the flag. These answers can all be located in certain event log files provided by HTB.</p>
+<h3 id="solution-2">Solution<a hidden class="anchor" aria-hidden="true" href="#solution-2">#</a></h3>
+<ol>
+<li>What are the IP address and port of the server from which the malicious actors downloaded the ransomware? (for example: 98.76.54.32:443)</li>
+</ol>
+<ul>
+<li>Answer: <code>103.162.14.116:8888</code></li>
+</ul>
+<p>To complete this question, we can analyze the <code>Security</code> log file and filter the logs with event ID 4688 which is normally logged in Event Viewer when a new process is created. After filtering the results, we find a Powershell script that was executed to download the ransomware (&lsquo;mscalc.exe&rsquo;) from a malicious server with its IP address and port. Additionally, we now know the estimated time of the ransomware attack is around 11:03:24 AM on 20/9/2023.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win2.png" alt=""  />
+</p>
+<ol start="2">
+<li>According to the sysmon logs, what is the MD5 hash of the ransomware? (for example: 6ab0e507bcc2fad463959aa8be2d782f)</li>
+</ol>
+<ul>
+<li>Answer: <code>B94F3FF666D9781CB69088658CD53772</code></li>
+</ul>
+<p>To complete this question, we can analyze the <code>sysmon</code> log file and filter the logs with event ID 1 which is normally logged in Event Viewer when a new process is created. After filtering the results and since we know the Powershell script downloads the ransomware, we can attempt to find its child processes to locate the creation process of the ransomware. After analyzing the logs, we can find the ransomware with its MD5 hash.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win3.png" alt=""  />
+</p>
+<ol start="3">
+<li>Based on the hash found, determine the family label of the ransomware in the wild from online reports such as Virus Total, Hybrid Analysis, etc. (for example: wannacry)</li>
+</ol>
+<ul>
+<li>Answer: <code>lokilocker</code></li>
+</ul>
+<p>To complete this question, just put the ransomware&rsquo;s MD5 hash to any OSINT tool and check its family labels.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win4.png" alt=""  />
+</p>
+<ol start="4">
+<li>What is the name of the task scheduled by the ransomware? (for example: WindowsUpdater)</li>
+</ol>
+<ul>
+<li>Answer: <code>Loki</code></li>
+</ul>
+<p>To complete this question, we can analyze the <code>sysmon</code> log file and filter the logs with keyword &lsquo;schtasks&rsquo; which is the name for task scheduling process. After filtering the results, we find a schtasks program with the parent process being the ransomware.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win5.png" alt=""  />
+</p>
+<ol start="5">
+<li>What are the parent process name and ID of the ransomware process? (for example: svchost.exe_4953)</li>
+</ol>
+<ul>
+<li>Answer: <code>powershell.exe_3856</code></li>
+</ul>
+<p>To complete this question, we can analyze the <code>sysmon</code> log file and check the ransomware process again. Viewing the XML format of the ransomware process, we can easily find the parent process name and ID of the ransomware process.</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win6.png" alt=""  />
+</p>
+<ol start="6">
+<li>Following the PPID, provide the file path of the initial stage in the infection chain. (for example: D:\Data\KCorp\FirstStage.pdf)</li>
+</ol>
+<ul>
+<li>Answer: <code>C:\Users\HoaGay\Documents\Subjects\Unexpe.docx</code></li>
+</ul>
+<p>To complete this question, we can analyze the <code>Security</code> log file again and check the Powershell script process again. As the question suggests, we can use the PPID to retrace the steps to the initial stage in the infection chain. As shown in the pictures below, we then stumble upon a malicious <code>.docx</code> file</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win7.png" alt=""  />
+</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win8.png" alt=""  />
+</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win9.png" alt=""  />
+</p>
+<ol start="7">
+<li>When was the first file in the infection chain opened (in UTC)? (for example: 1975-04-30_12:34:56)</li>
+</ol>
+<ul>
+<li>Answer: <code>2023-09-20_03:03:20</code></li>
+</ul>
+<p>To complete this question, we can just view the XML format of the <code>.docx</code> file and find the <code>TimeCreated SystemTime</code> row. ENSURE THE TIME FORMAT IS IN UTC!</p>
+<p><img loading="lazy" src="https://github.com/warlocksmurf/hacktheboo2023-ctf/raw/main/images/win10.png" alt=""  />
+</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://malw0re.github.io/tags/ctf/">ctf</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://malw0re.github.io/posts/tryhackme/stealth/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>stealth</span>
+  </a>
+  <a class="next" href="https://malw0re.github.io/posts/exploiting-services-series/insecure-rdp/">
+    <span class="title">Next »</span>
+    <br>
+    <span>INSECURE RDP</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://malw0re.github.io/">OUHBOY</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

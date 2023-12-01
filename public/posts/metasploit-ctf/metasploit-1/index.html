@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>MSF CTF | OUHBOY</title>
+<meta name="keywords" content="Metasploit-ctf">
+<meta name="description" content="Metasploit ctf series">
+<meta name="author" content="Malw0re">
+<link rel="canonical" href="https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://malw0re.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://malw0re.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://malw0re.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://malw0re.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://malw0re.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="MSF CTF" />
+<meta property="og:description" content="Metasploit ctf series" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-15T11:30:03+00:00" />
+<meta property="article:modified_time" content="2023-09-15T11:30:03+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MSF CTF"/>
+<meta name="twitter:description" content="Metasploit ctf series"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://malw0re.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "MSF CTF",
+      "item": "https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MSF CTF",
+  "name": "MSF CTF",
+  "description": "Metasploit ctf series",
+  "keywords": [
+    "Metasploit-ctf"
+  ],
+  "articleBody": "Metasploit ctf I (easy) CTF Scenario: This lab is dedicated to you! No other users are on this network :) Once you start the lab, you will have access to a Kali terminal based instance. This machine has an interface with IP address 192.X.Y.Z. The lab has two target machines which should be located on the same subnet i.e. 192.X.Y.0/24 The target systems most of times, belong to “admin” or “root” user. Do not attack the gateway located at IP address 192.X.Y.1 You can use all tools installed in Kali to complete this lab. Flags: This lab has only 1 Flag to be collected. The Flag can be identified either by the strings flag, flagX, FLAG, FLAGX. The Flag can either be a normal string or a 32-character random Hex string. Recon checking our network interfaces, with ip a s this is a command used to display info about the network interfaces on the system.\nHaving identified our target target-1, \u0026 target-2 , our aim is to exploit the two boxes, so running an nmap scan we see target-1 is running rmiregistry on port 1909 and target-2 is running ssh.\nWhat is rmiregistry? it’s a tool in Java used for Remote Method Invocation to manage and look up remote objects on a network,RMI in java allows objects in one Java Virtual Machine to invoke methods on objects residing in another JVM, another remote machine. This provides a way for Java applications to communicate and interact across a network.[https://docs.oracle.com/javase/8/docs/technotes/guides/rmi/index.html](read more)\nmetasploit since it’s a metasploit ctf we need to check out for some exploit.\nWe find a module that take advantage of the deault configuration of the RMI registry and RMI Activation services, which allow loading classes from any remote (HTTP) URL.\nAs it invokes a method in the RMI Distributed Garbage Collector which is available via every RMI endpoint, it can be used against both rmiregistry and rmid, and against most other (custom) RMI endpoints as well. Note that it does not work against Java Management Extension (JMX) ports since those do not support remote class loading, unless another RMI endpoint is active in the same Java process.\nRMI method calls do not support or require any sort of authentication.\nexploit So, loading up everything on metasploit, running the module we get a shell back\nstabilizing our shell we go to the home directory under the folder alice there is some ssh keys that we can use and login with since we are already root.\nso, having known where the ssh keys are we can background our sessions and use the ssh_creds metasploit module.\nflag. the ssh_creds metasploit module, it will collect the contents of all users’ .ssh directories on the targeted machine.\nAfter which we can use the ssh_login module to login into the machine target-2, we are using the login_pubkey cause of the public key we got on the alice folder.\nN|B\nI set the rhost to the machine that we are targeting target-2 which is the ip with the .4.\nChecking our sessions we see that we have a new session created and we got the flag.\n",
+  "wordCount" : "520",
+  "inLanguage": "en",
+  "datePublished": "2023-09-15T11:30:03Z",
+  "dateModified": "2023-09-15T11:30:03Z",
+  "author":{
+    "@type": "Person",
+    "name": "Malw0re"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OUHBOY",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://malw0re.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://malw0re.github.io/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://malw0re.github.io/posts/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/archives/" title="archives">
+                    <span>archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://malw0re.github.io/search/" title="🔍 (Alt &#43; /)" accesskey=/>
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://malw0re.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://malw0re.github.io/posts/">Posts</a></div>
+    <h1 class="post-title">
+      MSF CTF
+    </h1>
+    <div class="post-description">
+      Metasploit ctf series
+    </div>
+    <div class="post-meta">&lt;span title=&#39;2023-09-15 11:30:03 &#43;0000 &#43;0000&#39;&gt;September 15, 2023&lt;/span&gt;&amp;nbsp;·&amp;nbsp;3 min&amp;nbsp;·&amp;nbsp;Malw0re
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#ctf-scenario">CTF Scenario:</a></li>
+      </ul>
+    </li>
+    <li><a href="#flags">Flags:</a></li>
+    <li><a href="#recon">Recon</a></li>
+    <li><a href="#metasploit">metasploit</a></li>
+    <li><a href="#exploit">exploit</a></li>
+    <li><a href="#flag">flag.</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="metasploit-ctf-i-easy">Metasploit ctf I (<em>easy</em>)<a hidden class="anchor" aria-hidden="true" href="#metasploit-ctf-i-easy">#</a></h1>
+<h3 id="ctf-scenario">CTF Scenario:<a hidden class="anchor" aria-hidden="true" href="#ctf-scenario">#</a></h3>
+<ul>
+<li>This lab is dedicated to you! No other users are on this network :)</li>
+<li>Once you start the lab, you will have access to a Kali terminal based instance. This machine has an interface with IP address 192.X.Y.Z.</li>
+<li>The lab has two target machines which should be located on the same subnet  i.e. 192.X.Y.0/24</li>
+<li>The target systems most of times, belong to &ldquo;admin&rdquo; or &ldquo;root&rdquo; user.</li>
+<li>Do not attack the gateway located at IP address 192.X.Y.1</li>
+<li>You can use all tools installed in Kali to complete this lab.</li>
+</ul>
+<h2 id="flags">Flags:<a hidden class="anchor" aria-hidden="true" href="#flags">#</a></h2>
+<ul>
+<li>This lab has only 1 Flag to be collected.</li>
+<li>The Flag can be identified either by the strings flag, flagX, FLAG, FLAGX.</li>
+<li>The Flag can either be a normal string or a 32-character random Hex string.</li>
+</ul>
+<h2 id="recon">Recon<a hidden class="anchor" aria-hidden="true" href="#recon">#</a></h2>
+<p>checking our network interfaces, with <code>ip a s</code> this is a command used to display info about the network interfaces on the system.</p>
+<p><img loading="lazy" src="https://i.imgur.com/Q3nW1a4.png" alt=""  />
+</p>
+<p>Having identified our target <code>target-1</code>, &amp; <code>target-2</code> , our aim is to exploit the two boxes, so running an nmap scan we see <code>target-1</code> is running <code>rmiregistry</code> on port 1909 and <code>target-2</code> is running ssh.</p>
+<p><img loading="lazy" src="https://i.imgur.com/Vzu6BCd.png" alt=""  />
+</p>
+<p>What is <em><strong>rmiregistry</strong></em>? it&rsquo;s a tool in Java used for Remote Method Invocation to manage and look up remote objects on a network,<em>RMI</em> in java allows objects in one Java Virtual Machine to invoke methods on objects residing in another JVM, another remote machine.
+This provides a way for Java applications to communicate and interact across a network.[https://docs.oracle.com/javase/8/docs/technotes/guides/rmi/index.html](read more)</p>
+<h2 id="metasploit">metasploit<a hidden class="anchor" aria-hidden="true" href="#metasploit">#</a></h2>
+<p>since it&rsquo;s a metasploit ctf we need to check out for some exploit.</p>
+<p>We find a module that take advantage of the deault configuration of the RMI registry and RMI Activation services, which allow loading classes from any remote (HTTP) URL.</p>
+<p>As it invokes a method in the RMI Distributed Garbage Collector which is available via every RMI endpoint, it can be used against both rmiregistry and rmid, and against most other (custom) RMI endpoints as well. Note that it does not work against Java Management Extension (JMX) ports since those do not support remote class loading, unless another RMI endpoint is active in the same Java process.</p>
+<p>RMI method calls do not support or  require any sort of authentication.</p>
+<h2 id="exploit">exploit<a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<p>So, loading up everything on metasploit, running the module we get a shell back</p>
+<p><img loading="lazy" src="https://i.imgur.com/Le8fCAn.png" alt=""  />
+</p>
+<p>stabilizing our shell we go to the home directory under the folder alice there is some ssh keys that we can use and login with since we are already root.</p>
+<p><img loading="lazy" src="https://i.imgur.com/LUcKnZZ.png" alt=""  />
+</p>
+<p>so, having known where the ssh keys are we can background our sessions and use the ssh_creds metasploit module.</p>
+<h2 id="flag">flag.<a hidden class="anchor" aria-hidden="true" href="#flag">#</a></h2>
+<p>the ssh_creds metasploit module, it will collect the contents of all users&rsquo; .ssh directories on the targeted machine.</p>
+<p><img loading="lazy" src="https://i.imgur.com/Feds9zY.png" alt=""  />
+</p>
+<p>After which we can use the ssh_login module to login into the machine <em>target-2</em>, we are using the login_pubkey cause of the public key we got on the alice folder.</p>
+<p><img loading="lazy" src="https://i.imgur.com/8bo6jEO.png" alt=""  />
+</p>
+<p><strong>N|B</strong></p>
+<p>I set the rhost to the machine that we are targeting <em>target-2</em> which is the ip with the <em>.4</em>.</p>
+<p>Checking our sessions we see that we have a new session created and we got the flag.</p>
+<p><img loading="lazy" src="https://i.imgur.com/vsZZTmU.png" alt=""  />
+</p>
+<p><img loading="lazy" src="https://i.imgur.com/7rV9TRB.png" alt=""  />
+
+<img loading="lazy" src="https://i.imgur.com/BDHEMIo.png" alt=""  />
+</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://malw0re.github.io/tags/metasploit-ctf/">Metasploit-ctf</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://malw0re.github.io/posts/metasploit-ctf/metasploit-2/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>MSF CTF II</span>
+  </a>
+  <a class="next" href="https://malw0re.github.io/posts/active-directory/ad-credential-enumeration/">
+    <span class="title">Next »</span>
+    <br>
+    <span>AD CRED ENUM</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://malw0re.github.io/">OUHBOY</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

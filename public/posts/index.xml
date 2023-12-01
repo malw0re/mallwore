@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on OUHBOY</title>
+    <link>https://malw0re.github.io/posts/</link>
+    <description>Recent content in Posts on OUHBOY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 29 Nov 2023 11:30:03 +0000</lastBuildDate><atom:link href="https://malw0re.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>stealth</title>
+      <link>https://malw0re.github.io/posts/tryhackme/stealth/</link>
+      <pubDate>Wed, 29 Nov 2023 11:30:03 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/tryhackme/stealth/</guid>
+      <description>Stealth Tryhackme Room</description>
+    </item>
+    
+    <item>
+      <title>Hacktheboo 2023 CTF</title>
+      <link>https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/</link>
+      <pubDate>Mon, 23 Oct 2023 17:21:14 +0300</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/</guid>
+      <description>Challenges Writeup</description>
+    </item>
+    
+    <item>
+      <title>INSECURE RDP</title>
+      <link>https://malw0re.github.io/posts/exploiting-services-series/insecure-rdp/</link>
+      <pubDate>Fri, 13 Oct 2023 17:21:14 +0300</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/exploiting-services-series/insecure-rdp/</guid>
+      <description>Exploiting insecure RDP Services</description>
+    </item>
+    
+    <item>
+      <title>MSF CTF II</title>
+      <link>https://malw0re.github.io/posts/metasploit-ctf/metasploit-2/</link>
+      <pubDate>Thu, 05 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/metasploit-ctf/metasploit-2/</guid>
+      <description>Metasploit ctf series two</description>
+    </item>
+    
+    <item>
+      <title>MSF CTF</title>
+      <link>https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/</link>
+      <pubDate>Fri, 15 Sep 2023 11:30:03 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/metasploit-ctf/metasploit-1/</guid>
+      <description>Metasploit ctf series</description>
+    </item>
+    
+    <item>
+      <title>AD CRED ENUM</title>
+      <link>https://malw0re.github.io/posts/active-directory/ad-credential-enumeration/</link>
+      <pubDate>Wed, 09 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/active-directory/ad-credential-enumeration/</guid>
+      <description>Active Directory credential enumeration</description>
+    </item>
+    
+    <item>
+      <title>KERBEROS</title>
+      <link>https://malw0re.github.io/posts/active-directory/kerberos-101/</link>
+      <pubDate>Thu, 13 Jul 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://malw0re.github.io/posts/active-directory/kerberos-101/</guid>
+      <description>Active Directory kerberos</description>
+    </item>
+    
+  </channel>
+</rss>
