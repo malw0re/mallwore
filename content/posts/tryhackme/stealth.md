@@ -138,8 +138,10 @@ So on the site we are only allowed to upload powershell scripts, we need to uplo
 Generating a reverse shell with [revshells](http://revshells.com) and uploading it on the website we get a connection back. 
 
 *Disclaimer*
-![](https://i.imgur.com/FQKIuhp.png)
+
 After uploading the script and using netcat as your listener you'll get a shell connection back but without the terminal instant which is *'funny'* to work with. 
+![](https://i.imgur.com/FQKIuhp.png)
+
 
 A better shell instance that i got was from this guy [malw0re](https://github.com/malw0re/scriptures-). So after uploading we get a clean looking shell back. Searching the folders we land on the Desktop folder and there is a file called *encodedflag*.
 
