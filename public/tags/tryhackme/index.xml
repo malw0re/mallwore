@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>tryhackme on OUHBOY</title>
-    <link>https://malw0re.github.io/tags/tryhackme/</link>
-    <description>Recent content in tryhackme on OUHBOY</description>
+    <title>Tryhackme on OUHBOY</title>
+    <link>http://localhost:1313/tags/tryhackme/</link>
+    <description>Recent content in Tryhackme on OUHBOY</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 29 Nov 2023 11:30:03 +0000</lastBuildDate><atom:link href="https://malw0re.github.io/tags/tryhackme/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 20 Jan 2024 11:30:03 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/tryhackme/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Simple CTF</title>
+      <link>http://localhost:1313/posts/tryhackme/simple-ctf/easyctf/</link>
+      <pubDate>Sat, 20 Jan 2024 11:30:03 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/tryhackme/simple-ctf/easyctf/</guid>
+      <description>Simple CTF TryhackMe</description>
+    </item>
+    
     <item>
       <title>stealth</title>
-      <link>https://malw0re.github.io/posts/tryhackme/stealth/</link>
+      <link>http://localhost:1313/posts/tryhackme/stealth/</link>
       <pubDate>Wed, 29 Nov 2023 11:30:03 +0000</pubDate>
       
-      <guid>https://malw0re.github.io/posts/tryhackme/stealth/</guid>
+      <guid>http://localhost:1313/posts/tryhackme/stealth/</guid>
       <description>Stealth Tryhackme Room</description>
     </item>
     

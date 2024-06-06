@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><meta charset="utf-8">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="noindex, nofollow">
 <title>Hacktheboo 2023 CTF | OUHBOY</title>
 <meta name="keywords" content="ctf">
 <meta name="description" content="Challenges Writeup">
 <meta name="author" content="Malw0re">
-<link rel="canonical" href="https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/">
+<link rel="canonical" href="http://localhost:1313/posts/hacktheboo2023-ctf/forensics/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
-<link rel="icon" href="https://malw0re.github.io/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://malw0re.github.io/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://malw0re.github.io/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://malw0re.github.io/apple-touch-icon.png">
-<link rel="mask-icon" href="https://malw0re.github.io/safari-pinned-tab.svg">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/hacktheboo2023-ctf/forensics/">
 <noscript>
     <style>
         #theme-toggle,
@@ -56,71 +57,7 @@
         }
 
     </style>
-</noscript><meta property="og:title" content="Hacktheboo 2023 CTF" />
-<meta property="og:description" content="Challenges Writeup" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2023-10-23T17:21:14+03:00" />
-<meta property="article:modified_time" content="2023-10-23T17:21:14+03:00" />
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Hacktheboo 2023 CTF"/>
-<meta name="twitter:description" content="Challenges Writeup"/>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position":  1 ,
-      "name": "Posts",
-      "item": "https://malw0re.github.io/posts/"
-    }, 
-    {
-      "@type": "ListItem",
-      "position":  2 ,
-      "name": "Hacktheboo 2023 CTF",
-      "item": "https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/"
-    }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "Hacktheboo 2023 CTF",
-  "name": "Hacktheboo 2023 CTF",
-  "description": "Challenges Writeup",
-  "keywords": [
-    "ctf"
-  ],
-  "articleBody": " Hi 👋, in this article i’ll be sharing some challenges from the hacktheboo ctf challenges that was up i covered 3 challenges didn’t touch on the rest that much. So for the first bat challenge it was under the practice section and the last two are forensics which i decided to work on they were interesting.\nHope you have a nice read 😅\nBat Problems Explanation We are given the following file:\npayload.bat: Malicious bat file. As we can see from the following image, the bat script contains many random variables that are assigned random values. In a batch script (a .bat or .cmd file), the set command defines and manipulates environment variables which store information that can be used by the script or other programs running in the same environment (the Command Prompt session).\nSolution First, the bat file can be analyzed using Any.Run which is a malware analyzer tool. We will get the following result if we upload the sample on the aforementioned site.\nBy analyzing the behavior graph, we notice three actions made:\nThe attacker can be seen using cmd to copy PowerShell to a different path with a random name (Earttxmxaqr.png). The attacker then uses cmd again to rename the downloaded bat file and also change it’s extension to .png.bat to avoid detection. The attacker executes the base64 encoded string using the renamed PowerShell executable (-enc argument in Powershell is used to pass a base64 encoded command). By decoding the string, the flag can be retrieved.\nTrick or Treat Explanation We are given the following file:\ncapture.pcap: Packet capture file trick_or_treat.lnk: The malicious file Since the malicious file is provided by HTB, we can first gain additional information on it through VirusTotal, a famous OSINT website. After scanning, the file shows that it is indeed malicious and it connects to a malicious domain called windowsliveupdater.com. We also can notice that the file is connected to a few IP addresses, mainly 209.197.3.8 which is the malicious one.\nAnalyzing further, we can understand what kind of processes are executed by the malicious file and how it attacks a system.\nAs shown in the picture below, the malicious file seems to download malicious data from http://windowsliveupdater.com using a random User-Agent for HTTP requests to essentially mask its identity on the network. It then sets the downloaded data into a variable ($vurnwos) and processes the characters in pairs and converts them from hexadecimal representation to their actual characters. It then performs a bitwise XOR operation with 0x1d on each character and the output is appended to the $vurnwos string. Finally, it executes the variable using Invoke-Command. It also attempts to execute an empty variable ($asvods).\nAfter knowing what the malicious file does, the packet capture file can be analyzed using Wireshark to find the downloaded content. Since we know that the malicious file requested data from a website, we can filter HTTP packets only.\nGoing through the HTTP packets, we find a packet that shows the victim sending a GET request to http://windowsliveupdater.com. Analyzing the User-Agent, we can see that it is one of the randomized user agents set in the malicious file.\nNow we know that that the IP address 77.74.198.52 is responsible for the malicious file execution, we can check its HTTP response. Notice that the HTTP response packet has a cleartext data that is truncated because it is too long for Wireshark. The data is our key to getting the flag and it must be extracted using the decoding method specified in the malicious file.\nSolution Since we know that the downloable content is encoded in hex and also XOR’ed using this key 0x1d, we can use CyberChef to extract the content.\nValHalloween Explanation We are given the following file:\nLogs: Directory containing various Windows XML EventLog (.evtx) files In this challenge, we are given a series of questions that must be answered to obtain the flag. These answers can all be located in certain event log files provided by HTB.\nSolution What are the IP address and port of the server from which the malicious actors downloaded the ransomware? (for example: 98.76.54.32:443) Answer: 103.162.14.116:8888 To complete this question, we can analyze the Security log file and filter the logs with event ID 4688 which is normally logged in Event Viewer when a new process is created. After filtering the results, we find a Powershell script that was executed to download the ransomware (‘mscalc.exe’) from a malicious server with its IP address and port. Additionally, we now know the estimated time of the ransomware attack is around 11:03:24 AM on 20/9/2023.\nAccording to the sysmon logs, what is the MD5 hash of the ransomware? (for example: 6ab0e507bcc2fad463959aa8be2d782f) Answer: B94F3FF666D9781CB69088658CD53772 To complete this question, we can analyze the sysmon log file and filter the logs with event ID 1 which is normally logged in Event Viewer when a new process is created. After filtering the results and since we know the Powershell script downloads the ransomware, we can attempt to find its child processes to locate the creation process of the ransomware. After analyzing the logs, we can find the ransomware with its MD5 hash.\nBased on the hash found, determine the family label of the ransomware in the wild from online reports such as Virus Total, Hybrid Analysis, etc. (for example: wannacry) Answer: lokilocker To complete this question, just put the ransomware’s MD5 hash to any OSINT tool and check its family labels.\nWhat is the name of the task scheduled by the ransomware? (for example: WindowsUpdater) Answer: Loki To complete this question, we can analyze the sysmon log file and filter the logs with keyword ‘schtasks’ which is the name for task scheduling process. After filtering the results, we find a schtasks program with the parent process being the ransomware.\nWhat are the parent process name and ID of the ransomware process? (for example: svchost.exe_4953) Answer: powershell.exe_3856 To complete this question, we can analyze the sysmon log file and check the ransomware process again. Viewing the XML format of the ransomware process, we can easily find the parent process name and ID of the ransomware process.\nFollowing the PPID, provide the file path of the initial stage in the infection chain. (for example: D:\\Data\\KCorp\\FirstStage.pdf) Answer: C:\\Users\\HoaGay\\Documents\\Subjects\\Unexpe.docx To complete this question, we can analyze the Security log file again and check the Powershell script process again. As the question suggests, we can use the PPID to retrace the steps to the initial stage in the infection chain. As shown in the pictures below, we then stumble upon a malicious .docx file\nWhen was the first file in the infection chain opened (in UTC)? (for example: 1975-04-30_12:34:56) Answer: 2023-09-20_03:03:20 To complete this question, we can just view the XML format of the .docx file and find the TimeCreated SystemTime row. ENSURE THE TIME FORMAT IS IN UTC!\n",
-  "wordCount" : "1139",
-  "inLanguage": "en",
-  "datePublished": "2023-10-23T17:21:14+03:00",
-  "dateModified": "2023-10-23T17:21:14+03:00",
-  "author":{
-    "@type": "Person",
-    "name": "Malw0re"
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://malw0re.github.io/posts/hacktheboo2023-ctf/forensics/"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "OUHBOY",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://malw0re.github.io/favicon.ico"
-    }
-  }
-}
-</script>
+</noscript>
 </head>
 
 <body class="" id="top">
@@ -138,7 +75,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://malw0re.github.io/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
+            <a href="http://localhost:1313/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -160,31 +97,33 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
             <li>
-                <a href="https://malw0re.github.io/posts/" title="posts">
+                <a href="http://localhost:1313/posts/" title="posts">
                     <span>posts</span>
                 </a>
             </li>
             <li>
-                <a href="https://malw0re.github.io/about/" title="about">
+                <a href="http://localhost:1313/about/" title="about">
                     <span>about</span>
                 </a>
             </li>
             <li>
-                <a href="https://malw0re.github.io/tags/" title="tags">
+                <a href="http://localhost:1313/tags/" title="tags">
                     <span>tags</span>
                 </a>
             </li>
             <li>
-                <a href="https://malw0re.github.io/archives/" title="archives">
+                <a href="http://localhost:1313/archives/" title="archives">
                     <span>archives</span>
                 </a>
             </li>
             <li>
-                <a href="https://malw0re.github.io/search/" title="🔍 (Alt &#43; /)" accesskey=/>
+                <a href="http://localhost:1313/search/" title="🔍 (Alt &#43; /)" accesskey=/>
                     <span>🔍</span>
                 </a>
             </li>
@@ -382,15 +321,15 @@ We will get the following result if we upload the sample on the aforementioned s
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://malw0re.github.io/tags/ctf/">ctf</a></li>
+      <li><a href="http://localhost:1313/tags/ctf/">Ctf</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://malw0re.github.io/posts/tryhackme/stealth/">
+  <a class="prev" href="http://localhost:1313/posts/htb/hospital/hospital-notes/">
     <span class="title">« Prev</span>
     <br>
-    <span>stealth</span>
+    <span>Hospital</span>
   </a>
-  <a class="next" href="https://malw0re.github.io/posts/exploiting-services-series/insecure-rdp/">
+  <a class="next" href="http://localhost:1313/posts/exploiting-services-series/insecure-rdp/">
     <span class="title">Next »</span>
     <br>
     <span>INSECURE RDP</span>
@@ -402,7 +341,7 @@ We will get the following result if we upload the sample on the aforementioned s
     </main>
     
 <footer class="footer">
-    <span>&copy; 2023 <a href="https://malw0re.github.io/">OUHBOY</a></span>
+    <span>&copy; 2024 <a href="http://localhost:1313/">OUHBOY</a></span>
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &

